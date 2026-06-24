@@ -11,8 +11,8 @@ import {
   FaUserFriends,
 } from "react-icons/fa";
 import '../css/Vehicles.css';
-import toyotaInnova from "../assets/Vehivlesimages/Toyota_Innova_Crysta.jpg";
-
+import toyotaInnova from "../assets/Vehiclesimages/Toyota_Innova_Crysta.jpg";
+import hondaCity from "../assets/Vehiclesimages/Honda_City.jpg";
 function Vehicles() {
   const vehicles = [
     {
@@ -35,6 +35,7 @@ function Vehicles() {
       year: 2022,
       status: "Active",
       service: "18 May 2024",
+      image:hondaCity,
     },
     {
       name: "Maruti Suzuki Swift",

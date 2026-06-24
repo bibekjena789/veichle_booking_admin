@@ -133,7 +133,7 @@
   cursor: pointer;
 }
 
-.filter-btn:hover1 {
+.filter-btn1:hover {
   background: #f3f4f6;
 }
 
@@ -146,6 +146,7 @@
 table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 th {
@@ -183,7 +184,8 @@ tbody tr:hover td {
 .vehicle-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  min-width: 180px;
 }
 
 .vehicle-img {
@@ -211,7 +213,7 @@ tbody tr:hover td {
 
 /* Type Badge */
 
-.type-badge {
+.type-badge1 {
   background: #e0f2fe;
   color: #0284c7;
   padding: 6px 12px;
@@ -250,19 +252,19 @@ tbody tr:hover td {
 
 /* Actions */
 
-.actions {
+.actions1 {
   display: flex;
   justify-content: center;
   gap: 12px;
 }
 
-.actions svg {
+.actions1 svg {
   cursor: pointer;
   transition: all 0.3s ease;
   color: #64748b;
 }
 
-.actions svg:hover {
+.actions1 svg:hover {
   color: #0ea5a4;
   transform: scale(1.2);
 }
@@ -274,7 +276,7 @@ tbody tr:hover td {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .table-top {
+  .table-top1 {
     flex-direction: column;
     align-items: flex-start;
     gap: 15px;
@@ -286,7 +288,7 @@ tbody tr:hover td {
     grid-template-columns: 1fr;
   }
 
-  .filters {
+  .filters1 {
     flex-wrap: wrap;
   }
 
