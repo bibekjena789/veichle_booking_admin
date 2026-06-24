@@ -18,7 +18,7 @@ const Navbar = ({ toggleSidebar, sidebarOpen }) => {
           <span className="logo-icon">🚗</span>
           <span className="logo-text"> Vehicles Booking</span>
           <span className="logo-divider">|</span>
-          <span className="logo-sub">Travoa</span>
+          <span className="logo-sub">pixiyatra</span>
         </Link>
       </div>
 
