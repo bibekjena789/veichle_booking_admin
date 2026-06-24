@@ -23,6 +23,20 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { icon: FaUser, label: 'Profile', path: '/profile' },
   ];
 
+  // Prefetch page on hover
+  const prefetchPage = (path) => {
+    // Remove leading slash and capitalize first letter
+    const pageName = path.replace('/', '');
+    const capitalizedPage = pageName.charAt(0).toUpperCase() + pageName.slice(1);
+    
+    // Dynamically import the page component
+    try {
+      import(`../pages/${capitalizedPage}`);
+    } catch (e) {
+      // Handle error silently
+    }
+  };
+
   return (
     <aside className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
       <div className="sidebar-header">
@@ -47,8 +61,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                   className={({ isActive }) => 
                     `sidebar-link ${isActive ? 'active' : ''}`
                   }
+                  onMouseEnter={() => prefetchPage(item.path)}
                   onClick={() => {
-                    // Close sidebar on mobile after navigation
                     if (window.innerWidth <= 768) {
                       toggleSidebar();
                     }
@@ -67,7 +81,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
       <div className="sidebar-footer">
         <div className="sidebar-item">
-          <NavLink to="/logout" className="sidebar-link logout">
+          <NavLink to="/login" className="sidebar-link logout">
             <span className="sidebar-icon">
               <FaSignOutAlt />
             </span>

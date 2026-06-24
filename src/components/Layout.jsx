@@ -6,6 +6,7 @@ import './Layout.css';
 
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -23,22 +24,22 @@ function Layout() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Preload next page on hover
+  const handleLinkHover = (path) => {
+    // Prefetch the component
+    import(`../pages/${path.charAt(0).toUpperCase() + path.slice(1)}`);
+  };
+
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
   return (
     <div className="app-container">
-      {/* Left Sidebar - Full height top to bottom */}
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-      
-      {/* Right Content Area */}
       <div className={`right-content ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
-        {/* Navbar at top of right content */}
         <Navbar toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
-        
-        {/* Main Content */}
-        <main className="main-content">
+        <main className={`main-content ${isLoading ? 'loading' : ''}`}>
           <Outlet />
         </main>
       </div>
