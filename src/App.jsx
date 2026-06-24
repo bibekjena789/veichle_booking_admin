@@ -1,121 +1,168 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import React, { useState } from 'react';
+import './App.css';
+import Navbar from './components/Navbar';
+import Sidebar from './components/Sidebar';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="app-container">
+      <Navbar toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
+      <div className="main-layout">
+        <Sidebar isOpen={sidebarOpen} />
+        <main className={`content ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+          <div className="dashboard-content">
+            {/* Welcome Section */}
+            <div className="welcome-section">
+              <h1>Adventure is worthwhile in every destination</h1>
+              <p className="welcome-subtitle">Explore the world with Travoa</p>
+            </div>
 
-      <div className="ticks"></div>
+            {/* Booking Search Card */}
+            <div className="booking-search-card">
+              <div className="search-grid">
+                <div className="search-field">
+                  <label>FROM</label>
+                  <input type="text" placeholder="New York (NYC)" defaultValue="New York (NYC)" />
+                </div>
+                <div className="search-field">
+                  <label>TO</label>
+                  <input type="text" placeholder="Paris (CDG)" defaultValue="Paris (CDG)" />
+                </div>
+                <div className="search-field">
+                  <label>DEPARTURE</label>
+                  <input type="date" placeholder="dd-mm-yyyy" />
+                </div>
+                <div className="search-field">
+                  <label>RETURN</label>
+                  <input type="date" placeholder="dd-mm-yyyy" />
+                </div>
+                <div className="search-field">
+                  <label>TRAVELERS</label>
+                  <input type="text" placeholder="2 Travelers" defaultValue="2 Travelers" />
+                </div>
+                <div className="search-field search-button">
+                  <button className="btn-search">Search Flights</button>
+                </div>
+              </div>
+            </div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+            {/* Stats Cards */}
+            <div className="stats-grid">
+              <div className="stat-card">
+                <div className="stat-icon">✈️</div>
+                <div className="stat-info">
+                  <h3>TOTAL BOOKINGS</h3>
+                  <p className="stat-number">1,234</p>
+                  <span className="stat-change positive">↑ 12%</span>
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">🏨</div>
+                <div className="stat-info">
+                  <h3>ACTIVE HOTELS</h3>
+                  <p className="stat-number">56</p>
+                  <span className="stat-change positive">↑ 15%</span>
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">👤</div>
+                <div className="stat-info">
+                  <h3>TOTAL USERS</h3>
+                  <p className="stat-number">892</p>
+                  <span className="stat-change positive">↑ 18%</span>
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">💰</div>
+                <div className="stat-info">
+                  <h3>REVENUE</h3>
+                  <p className="stat-number">$45,678</p>
+                  <span className="stat-change positive">↑ 15%</span>
+                </div>
+              </div>
+            </div>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+            {/* Upcoming Trips & Popular Destinations */}
+            <div className="two-column-grid">
+              {/* Upcoming Trips */}
+              <div className="card-section">
+                <div className="section-header">
+                  <h2>Upcoming Trips</h2>
+                  <a href="#" className="view-all">View All</a>
+                </div>
+                <div className="trip-list">
+                  <div className="trip-item">
+                    <div className="trip-icon">✈️</div>
+                    <div className="trip-details">
+                      <h4>Paris, France</h4>
+                      <p className="trip-type">Flight</p>
+                      <p className="trip-date">20 May - 27 May, 2024</p>
+                      <p className="trip-travelers">👤 2 Travelers</p>
+                    </div>
+                  </div>
+                  <div className="trip-item">
+                    <div className="trip-icon">🏖️</div>
+                    <div className="trip-details">
+                      <h4>Bali, Indonesia</h4>
+                      <p className="trip-type">Package</p>
+                      <p className="trip-date">10 Jun - 15 Jun, 2024</p>
+                      <p className="trip-travelers">👤 2 Travelers</p>
+                    </div>
+                  </div>
+                  <div className="trip-item">
+                    <div className="trip-icon">🏨</div>
+                    <div className="trip-details">
+                      <h4>Dubai, UAE</h4>
+                      <p className="trip-type">Hotel</p>
+                      <p className="trip-date">05 Aug - 08 Aug, 2024</p>
+                      <p className="trip-travelers">👤 1 Traveler</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Popular Destinations */}
+              <div className="card-section">
+                <div className="section-header">
+                  <h2>Popular Destinations</h2>
+                  <a href="#" className="view-all">View All</a>
+                </div>
+                <div className="destination-list">
+                  <div className="destination-item">
+                    <div className="destination-image">🇬🇷</div>
+                    <div className="destination-info">
+                      <h4>Santorini, Greece</h4>
+                      <p>2,345 bookings</p>
+                    </div>
+                  </div>
+                  <div className="destination-item">
+                    <div className="destination-image">🇯🇵</div>
+                    <div className="destination-info">
+                      <h4>Tokyo, Japan</h4>
+                      <p>1,890 bookings</p>
+                    </div>
+                  </div>
+                  <div className="destination-item">
+                    <div className="destination-image">🇺🇸</div>
+                    <div className="destination-info">
+                      <h4>New York, USA</h4>
+                      <p>1,567 bookings</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
 }
 
-export default App
+export default App;
