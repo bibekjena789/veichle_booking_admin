@@ -1,19 +1,26 @@
 .vehicles-page {
-  padding: 25px;
+  padding: 20px;
   background: #f7f8fc;
   min-height: 100vh;
 }
 
+/* Header */
 
+.vehicle-header {
+  margin-bottom: 20px;
+}
 
 .vehicle-header h1 {
   font-size: 32px;
   margin-bottom: 5px;
+  color: #1e293b;
 }
 
 .vehicle-header p {
-  color: #6b7280;
+  color: #64748b;
 }
+
+/* Add Button */
 
 .add-btn {
   background: #0ea5a4;
@@ -23,7 +30,15 @@
   border-radius: 10px;
   cursor: pointer;
   font-weight: 600;
+  transition: 0.3s ease;
 }
+
+.add-btn:hover {
+  background: #0c8b88;
+  transform: translateY(-2px);
+}
+
+/* Stats Cards */
 
 .stats-grid {
   display: grid;
@@ -63,7 +78,7 @@
 }
 
 .stat-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-5px);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
 }
 
@@ -87,86 +102,137 @@
   color: #ef4444;
 }
 
-.table-card {
+/* Table Card */
+
+.table-card1 {
   background: white;
   border-radius: 18px;
   padding: 20px;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
 }
 
-.table-top {
+.table-top1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
 }
 
-.filters {
+.filters1 {
   display: flex;
   gap: 12px;
+  align-items: center;
 }
 
 .filters select,
-.filter-btn {
+.filter-btn1 {
   padding: 10px 15px;
-  border: 1px solid #ddd;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
+  background: white;
+  cursor: pointer;
 }
 
-.table-wrapper {
+.filter-btn1:hover {
+  background: #f3f4f6;
+}
+
+/* Table */
+
+.table-wrapper1 {
   overflow-x: auto;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 th {
   text-align: center;
-  background: #fafafa;
-  padding: 14px;
+  background: #f8fafc;
+  padding: 12px;
+  color: #475569;
+  font-weight: 600;
 }
 
 td {
-  padding: 16px 14px;
-  border-bottom: 1px solid #eee;
+  padding: 8px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: center;
+  font-size: 14px;
 }
+
+/* Table Row Hover */
+
+tbody tr {
+  transition: all 0.3s ease;
+}
+
+tbody tr:hover {
+  background: #f1f5f9;
+  transform: scale(1.005);
+}
+
+tbody tr:hover td {
+  color: #0f172a;
+}
+
+/* Vehicle */
 
 .vehicle-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  min-width: 180px;
 }
 
 .vehicle-img {
-  width: 80px;
-  height: 50px;
+  width: 90px;
+  height: 60px;
   object-fit: cover;
   border-radius: 8px;
   border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.vehicle-img:hover {
+  transform: scale(1.1);
 }
 
 .vehicle-info h4 {
   margin: 0;
+  font-size: 16px;
 }
 
 .vehicle-info span {
   font-size: 13px;
-  color: gray;
+  color: #64748b;
 }
 
-.type-badge {
+/* Type Badge */
+
+.type-badge1 {
   background: #e0f2fe;
   color: #0284c7;
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 13px;
+  font-weight: 500;
 }
+
+/* Status */
 
 .status {
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 13px;
+  transition: all 0.3s ease;
+}
+
+.status:hover {
+  transform: scale(1.05);
 }
 
 .active {
@@ -184,19 +250,35 @@ td {
   color: #dc2626;
 }
 
-.actions {
+/* Actions */
+
+.actions1 {
   display: flex;
+  justify-content: center;
   gap: 12px;
-  cursor: pointer;
 }
+
+.actions1 svg {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #64748b;
+}
+
+.actions1 svg:hover {
+  color: #0ea5a4;
+  transform: scale(1.2);
+}
+
+/* Responsive */
 
 @media (max-width: 992px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .table-top {
+  .table-top1 {
     flex-direction: column;
+    align-items: flex-start;
     gap: 15px;
   }
 }
@@ -206,9 +288,12 @@ td {
     grid-template-columns: 1fr;
   }
 
-  .vehicle-header {
+  .filters1 {
+    flex-wrap: wrap;
+  }
+
+  .vehicle-info {
     flex-direction: column;
     align-items: flex-start;
-    gap: 15px;
   }
 }
