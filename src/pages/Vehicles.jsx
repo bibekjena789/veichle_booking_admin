@@ -13,6 +13,9 @@ import {
 import '../css/Vehicles.css';
 import toyotaInnova from "../assets/Vehiclesimages/Toyota_Innova_Crysta.jpg";
 import hondaCity from "../assets/Vehiclesimages/Honda_City.jpg";
+import suzukiSwift from "../assets/Vehiclesimages/maruti-suzuki-dzire.jpg";
+import mahindraXuv from "../assets/Vehiclesimages/mahindra_xuv.jpg";
+import forceTraveller from "../assets/Vehiclesimages/force-traveller.jpg";
 function Vehicles() {
   const vehicles = [
     {
@@ -46,6 +49,7 @@ function Vehicles() {
       year: 2020,
       status: "Under Maintenance",
       service: "15 May 2024",
+      image:suzukiSwift,
     },
     {
       name: "Mahindra XUV500",
@@ -56,6 +60,7 @@ function Vehicles() {
       year: 2019,
       status: "Active",
       service: "10 May 2024",
+      image:mahindraXuv,
     },
     {
       name: "Force Traveller",
@@ -66,6 +71,7 @@ function Vehicles() {
       year: 2018,
       status: "Inactive",
       service: "02 May 2024",
+      image:forceTraveller,
     },
   ];
 
