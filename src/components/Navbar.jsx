@@ -1,6 +1,6 @@
 import React from 'react';
 import './Navbar.css';
-import { FaBars, FaBell, FaSearch, FaUserCircle } from 'react-icons/fa';
+import { FaBell, FaSearch, FaUserCircle } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 const Navbar = ({ toggleSidebar, sidebarOpen }) => {
@@ -12,11 +12,13 @@ const Navbar = ({ toggleSidebar, sidebarOpen }) => {
           onClick={toggleSidebar}
           aria-label="Toggle sidebar"
         >
-          <FaBars size={20} />
+          <span className="hamburger-icon">☰</span>
         </button>
         <Link to="/" className="logo">
-          <span className="logo-icon">✈️</span>
-          <span className="logo-text">Travoa</span>
+          <span className="logo-icon">🚗</span>
+          <span className="logo-text">Veiche Booking</span>
+          <span className="logo-divider">|</span>
+          <span className="logo-sub">Travoa</span>
         </Link>
       </div>
 
