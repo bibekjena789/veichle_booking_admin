@@ -1,4 +1,5 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import './Sidebar.css';
 import { 
   FaTachometerAlt, 
@@ -6,27 +7,35 @@ import {
   FaCar, 
   FaCalendarAlt, 
   FaStar, 
-  FaUser, 
-  FaSignOutAlt 
+  FaUser,
+  FaPlane,
+  FaHotel,
+  FaSuitcase,
+  FaBookmark,
+  FaWallet,
+  FaHeadset,
+  FaCog,
+  FaSignOutAlt
 } from 'react-icons/fa';
 
 const Sidebar = ({ isOpen }) => {
   const menuItems = [
-    { icon: FaTachometerAlt, label: 'Dashboard', active: true },
-    { icon: FaGift, label: 'Offers' },
-    { icon: FaCar, label: 'Vehicles' },
-    { icon: FaCalendarAlt, label: 'Bookings' },
-    { icon: FaStar, label: 'Reviews' },
-    { icon: FaUser, label: 'Profile' },
+    { icon: FaTachometerAlt, label: 'Dashboard', path: '/dashboard' },
+    { icon: FaCalendarAlt, label: 'Bookings', path: '/bookings' },
+    { icon: FaStar, label: 'Reviews', path: '/reviews' },
+    { icon: FaStar, label: 'Add Offer', path: '/offers' },
+    { icon: FaCog, label: 'Vehicles', path: '/vehicles' },
+    { icon: FaUser, label: 'Profile', path: '/profile' },
   ];
 
   return (
     <aside className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
       <div className="sidebar-header">
         <div className="sidebar-logo">
-          <span className="sidebar-logo-icon">🌍</span>
+          <span className="sidebar-logo-icon">✈️</span>
           {isOpen && <span className="sidebar-logo-text">Travoa</span>}
         </div>
+        {isOpen && <p className="sidebar-tagline">Explore the world</p>}
       </div>
 
       <nav className="sidebar-nav">
@@ -34,13 +43,18 @@ const Sidebar = ({ isOpen }) => {
           {menuItems.map((item, index) => {
             const Icon = item.icon;
             return (
-              <li key={index} className={`sidebar-item ${item.active ? 'active' : ''}`}>
-                <a href="#" className="sidebar-link">
+              <li key={index} className="sidebar-item">
+                <NavLink 
+                  to={item.path} 
+                  className={({ isActive }) => 
+                    `sidebar-link ${isActive ? 'active' : ''}`
+                  }
+                >
                   <span className="sidebar-icon">
                     <Icon />
                   </span>
                   {isOpen && <span className="sidebar-label">{item.label}</span>}
-                </a>
+                </NavLink>
               </li>
             );
           })}
@@ -49,12 +63,12 @@ const Sidebar = ({ isOpen }) => {
 
       <div className="sidebar-footer">
         <div className="sidebar-item">
-          <a href="#" className="sidebar-link logout">
+          <NavLink to="/logout" className="sidebar-link logout">
             <span className="sidebar-icon">
               <FaSignOutAlt />
             </span>
             {isOpen && <span className="sidebar-label">Logout</span>}
-          </a>
+          </NavLink>
         </div>
       </div>
     </aside>

@@ -1,6 +1,7 @@
 import React from 'react';
 import './Navbar.css';
 import { FaBars, FaBell, FaSearch, FaUserCircle } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 const Navbar = ({ toggleSidebar, sidebarOpen }) => {
   return (
@@ -13,13 +14,18 @@ const Navbar = ({ toggleSidebar, sidebarOpen }) => {
         >
           <FaBars size={20} />
         </button>
-        <div className="logo">
-          <span className="logo-icon">🚗</span>
-          <span className="logo-text">Veiche Booking</span>
-        </div>
+        <Link to="/" className="logo">
+          <span className="logo-icon">✈️</span>
+          <span className="logo-text">Travoa</span>
+        </Link>
       </div>
 
-      
+      <div className="navbar-center">
+        <div className="search-bar">
+          <FaSearch className="search-icon" />
+          <input type="text" placeholder="Search destinations, hotels, flights..." />
+        </div>
+      </div>
 
       <div className="navbar-right">
         <button className="notification-btn">
@@ -28,7 +34,7 @@ const Navbar = ({ toggleSidebar, sidebarOpen }) => {
         </button>
         <div className="user-profile">
           <FaUserCircle size={35} className="user-avatar" />
-          <span className="user-name">Admin</span>
+          <span className="user-name">John Doe</span>
         </div>
       </div>
     </nav>
