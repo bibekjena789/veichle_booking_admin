@@ -8,23 +8,18 @@ import {
   FaCalendarAlt, 
   FaStar, 
   FaUser,
-  FaPlane,
-  FaHotel,
-  FaSuitcase,
-  FaBookmark,
-  FaWallet,
-  FaHeadset,
-  FaCog,
-  FaSignOutAlt
+  FaSignOutAlt,
+  FaChevronLeft,
+  FaChevronRight
 } from 'react-icons/fa';
 
-const Sidebar = ({ isOpen }) => {
+const Sidebar = ({ isOpen, toggleSidebar }) => {
   const menuItems = [
     { icon: FaTachometerAlt, label: 'Dashboard', path: '/dashboard' },
     { icon: FaCalendarAlt, label: 'Bookings', path: '/bookings' },
     { icon: FaStar, label: 'Reviews', path: '/reviews' },
-    { icon: FaStar, label: 'Add Offer', path: '/offers' },
-    { icon: FaCog, label: 'Vehicles', path: '/vehicles' },
+    { icon: FaGift, label: 'Add Offer', path: '/offers' },
+    { icon: FaCar, label: 'Vehicles', path: '/vehicles' },
     { icon: FaUser, label: 'Profile', path: '/profile' },
   ];
 
@@ -32,6 +27,9 @@ const Sidebar = ({ isOpen }) => {
     <aside className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
       <div className="sidebar-header">
         <div className="sidebar-logo">
+          <button className="sidebar-toggle" onClick={toggleSidebar} aria-label="Toggle sidebar">
+            {isOpen ? <FaChevronLeft /> : <FaChevronRight />}
+          </button>
           <span className="sidebar-logo-icon">✈️</span>
           {isOpen && <span className="sidebar-logo-text">Travoa</span>}
         </div>
@@ -49,6 +47,12 @@ const Sidebar = ({ isOpen }) => {
                   className={({ isActive }) => 
                     `sidebar-link ${isActive ? 'active' : ''}`
                   }
+                  onClick={() => {
+                    // Close sidebar on mobile after navigation
+                    if (window.innerWidth <= 768) {
+                      toggleSidebar();
+                    }
+                  }}
                 >
                   <span className="sidebar-icon">
                     <Icon />
