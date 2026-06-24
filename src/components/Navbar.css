@@ -1,3 +1,4 @@
+/* Navbar.css */
 .navbar {
   position: fixed;
   top: 0;
@@ -14,16 +15,27 @@
   flex-shrink: 0;
 }
 
-/* Hide navbar menu toggle since sidebar handles it */
 .navbar-left {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
-/* Hide menu toggle in navbar since sidebar has its own toggle */
 .menu-toggle {
   display: none;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  align-items: center;
+}
+
+.menu-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
 }
 
 .logo {
@@ -39,8 +51,22 @@
 }
 
 .logo-text {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.logo-divider {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 20px;
+  font-weight: 300;
+  margin: 0 5px;
+}
+
+.logo-sub {
+  font-size: 16px;
+  font-weight: 500;
+  opacity: 0.85;
   letter-spacing: 0.5px;
 }
 
@@ -178,7 +204,15 @@
   }
 
   .logo-text {
-    font-size: 20px;
+    font-size: 18px;
+  }
+  
+  .logo-sub {
+    font-size: 14px;
+  }
+  
+  .logo-divider {
+    font-size: 16px;
   }
 
   .notification-btn {
@@ -187,25 +221,20 @@
   
   .menu-toggle {
     display: flex !important;
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    color: white;
-    padding: 8px 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    align-items: center;
-  }
-  
-  .menu-toggle:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.05);
   }
 }
 
 @media (max-width: 480px) {
   .logo-text {
-    font-size: 18px;
+    display: none;
+  }
+  
+  .logo-sub {
+    display: none;
+  }
+  
+  .logo-divider {
+    display: none;
   }
   
   .navbar-right {

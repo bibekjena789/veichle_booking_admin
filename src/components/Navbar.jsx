@@ -15,8 +15,10 @@ const Navbar = ({ toggleSidebar, sidebarOpen }) => {
           <FaBars size={20} />
         </button>
         <Link to="/" className="logo">
-          <span className="logo-icon">✈️</span>
-          <span className="logo-text">Travoa</span>
+          <span className="logo-icon">🚗</span>
+          <span className="logo-text">Veiche Booking</span>
+          <span className="logo-divider">|</span>
+          <span className="logo-sub">Travoa</span>
         </Link>
       </div>
 
