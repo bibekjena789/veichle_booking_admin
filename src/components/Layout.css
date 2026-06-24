@@ -8,25 +8,30 @@
 .main-layout {
   display: flex;
   flex: 1;
-  margin-top: 70px;
-  height: calc(100vh - 70px);
+  height: 100vh;
   overflow: hidden;
+  position: relative;
 }
 
+/* Content area - starts below navbar */
 .content {
   flex: 1;
   padding: 25px 30px;
+  margin-top: 70px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-y: auto;
   background: #f7fafc;
   height: calc(100vh - 70px);
+  min-height: 0;
 }
 
+/* Content with sidebar open */
 .content.sidebar-open {
   margin-left: 260px;
   width: calc(100% - 260px);
 }
 
+/* Content with sidebar closed */
 .content.sidebar-closed {
   margin-left: 72px;
   width: calc(100% - 72px);
@@ -50,6 +55,7 @@
   background: #764ba2;
 }
 
+/* Page animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -65,6 +71,7 @@
   animation: fadeIn 0.4s ease-in-out;
 }
 
+/* Mobile responsive */
 @media (max-width: 1024px) {
   .content {
     padding: 20px;
@@ -72,15 +79,12 @@
 }
 
 @media (max-width: 768px) {
-  .main-layout {
-    margin-top: 60px;
-    height: calc(100vh - 60px);
-  }
-  
   .content {
     padding: 15px;
     margin-left: 0 !important;
     width: 100% !important;
+    height: calc(100vh - 60px);
+    margin-top: 60px;
   }
   
   .content.sidebar-open,

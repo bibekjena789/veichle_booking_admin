@@ -29,7 +29,7 @@ function Layout() {
     <div className="app-container">
       <Navbar toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
       <div className="main-layout">
-        <Sidebar isOpen={sidebarOpen} />
+        <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
         <main className={`content ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
           <Outlet />
         </main>
