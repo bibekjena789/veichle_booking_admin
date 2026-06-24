@@ -4,12 +4,7 @@
   min-height: 100vh;
 }
 
-.vehicle-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
-}
+
 
 .vehicle-header h1 {
   font-size: 32px;
@@ -34,16 +29,42 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 }
 
 .stat-card {
-  background: white;
   border-radius: 16px;
   padding: 20px;
   display: flex;
   align-items: center;
   gap: 15px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.card1 {
+  background: linear-gradient(135deg, #dbeafe, #eff6ff);
+  border: 1px solid #93c5fd;
+}
+
+.card2 {
+  background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  border: 1px solid #86efac;
+}
+
+.card3 {
+  background: linear-gradient(135deg, #f3e8ff, #faf5ff);
+  border: 1px solid #d8b4fe;
+}
+
+.card4 {
+  background: linear-gradient(135deg, #fee2e2, #fef2f2);
+  border: 1px solid #fca5a5;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
 }
 
 .icon {
@@ -101,7 +122,7 @@ table {
 }
 
 th {
-  text-align: left;
+  text-align: center;
   background: #fafafa;
   padding: 14px;
 }

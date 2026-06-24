@@ -71,54 +71,43 @@ function Vehicles() {
   return (
     <div className="vehicles-page">
 
-      {/* Header */}
-
-      <div className="vehicle-header">
-        <div>
-          <h1>Vehicles</h1>
-          <p>Manage all vehicles, update details and monitor status</p>
-        </div>
-
-        <button className="add-btn">+ Add Vehicle</button>
-      </div>
-
       {/* Stats */}
 
-      <div className="stats-grid">
+<div className="stats-grid">
 
-        <div className="stat-card">
-          <FaCar className="icon blue" />
-          <div>
-            <span>Total Vehicles</span>
-            <h2>128</h2>
-          </div>
-        </div>
+  <div className="stat-card card1">
+    <FaCar className="icon blue" />
+    <div>
+      <span>Total Vehicles</span>
+      <h2>128</h2>
+    </div>
+  </div>
 
-        <div className="stat-card">
-          <FaCheckCircle className="icon green" />
-          <div>
-            <span>Active Vehicles</span>
-            <h2>102</h2>
-          </div>
-        </div>
+  <div className="stat-card card2">
+    <FaCheckCircle className="icon green" />
+    <div>
+      <span>Active Vehicles</span>
+      <h2>102</h2>
+    </div>
+  </div>
 
-        <div className="stat-card">
-          <FaTools className="icon purple" />
-          <div>
-            <span>Under Maintenance</span>
-            <h2>14</h2>
-          </div>
-        </div>
+  <div className="stat-card card3">
+    <FaTools className="icon purple" />
+    <div>
+      <span>Under Maintenance</span>
+      <h2>14</h2>
+    </div>
+  </div>
 
-        <div className="stat-card">
-          <FaTimesCircle className="icon red" />
-          <div>
-            <span>Inactive Vehicles</span>
-            <h2>12</h2>
-          </div>
-        </div>
+  <div className="stat-card card4">
+    <FaTimesCircle className="icon red" />
+    <div>
+      <span>Inactive Vehicles</span>
+      <h2>12</h2>
+    </div>
+  </div>
 
-      </div>
+</div>
 
       {/* Table */}
 
@@ -128,6 +117,7 @@ function Vehicles() {
           <h2>All Vehicles</h2>
 
           <div className="filters">
+             <button className="add-btn">+ Add Vehicle</button>
             <select>
               <option>All Status</option>
             </select>
