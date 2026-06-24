@@ -117,7 +117,7 @@ function Dashboard() {
 
             <div className="trip-card">
               <img
-                src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34"
+                src="src/assets/images/dashboard_image/destination1.jpg"
                 alt=""
               />
               <div>
@@ -131,7 +131,7 @@ function Dashboard() {
 
             <div className="trip-card">
               <img
-                src="https://images.unsplash.com/photo-1537996194471-e657df975ab4"
+                src="src/assets/images/dashboard_image/destination2.jpg"
                 alt=""
               />
               <div>
@@ -145,7 +145,7 @@ function Dashboard() {
 
             <div className="trip-card">
               <img
-                src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c"
+                src="src/assets/images/dashboard_image/destination3.jpg"
                 alt=""
               />
               <div>
@@ -174,7 +174,7 @@ function Dashboard() {
 
               <div className="destination">
                 <img
-                  src="https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff"
+                  src="src/assets/images/dashboard_image/destination1.jpg"
                   alt=""
                 />
                 <span>Santorini</span>
@@ -182,7 +182,7 @@ function Dashboard() {
 
               <div className="destination">
                 <img
-                  src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf"
+                  src="src/assets/images/dashboard_image/destination2.jpg"
                   alt=""
                 />
                 <span>Tokyo</span>
@@ -190,7 +190,7 @@ function Dashboard() {
 
               <div className="destination">
                 <img
-                  src="https://images.unsplash.com/photo-1499092346589-b9b6be3e94b2"
+                  src="src/assets/images/dashboard_image/destination3.jpg"
                   alt=""
                 />
                 <span>New York</span>
@@ -203,7 +203,7 @@ function Dashboard() {
             <h3>Top Offers For You</h3>
 
             <img
-              src="https://images.unsplash.com/photo-1573843981267-be1999ff37cd"
+              src="src/assets/images/dashboard_image/destination1.jpg"
               alt=""
             />
 
