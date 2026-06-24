@@ -12,6 +12,8 @@ function Layout() {
     const handleResize = () => {
       if (window.innerWidth <= 768) {
         setSidebarOpen(false);
+      } else {
+        setSidebarOpen(true);
       }
     };
     
@@ -27,10 +29,16 @@ function Layout() {
 
   return (
     <div className="app-container">
-      <Navbar toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
-      <div className="main-layout">
-        <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-        <main className={`content ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+      {/* Left Sidebar - Full height top to bottom */}
+      <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+      
+      {/* Right Content Area */}
+      <div className={`right-content ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+        {/* Navbar at top of right content */}
+        <Navbar toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
+        
+        {/* Main Content */}
+        <main className="main-content">
           <Outlet />
         </main>
       </div>
