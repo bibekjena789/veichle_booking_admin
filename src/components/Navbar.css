@@ -26,7 +26,7 @@
   border: none;
   color: white;
   cursor: pointer;
-  padding: 5px;
+  padding: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -36,21 +36,6 @@
 
 .menu-toggle:hover {
   background: rgba(255, 255, 255, 0.1);
-}
-
-.hamburger-icon {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  width: 24px;
-}
-
-.hamburger-icon span {
-  display: block;
-  height: 2px;
-  background: white;
-  width: 100%;
-  transition: 0.3s;
 }
 
 .logo {
@@ -108,7 +93,9 @@
   top: 50%;
   transform: translateY(-50%);
   color: rgba(255, 255, 255, 0.7);
-  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .navbar-right {
@@ -123,10 +110,12 @@
   border: none;
   color: white;
   cursor: pointer;
-  font-size: 20px;
-  padding: 5px;
+  padding: 8px;
   border-radius: 50%;
   transition: background 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .notification-btn:hover {
@@ -135,14 +124,16 @@
 
 .notification-badge {
   position: absolute;
-  top: -5px;
-  right: -5px;
+  top: 0;
+  right: 0;
   background: #ff4757;
   color: white;
   font-size: 10px;
   padding: 2px 6px;
   border-radius: 50%;
   font-weight: bold;
+  min-width: 18px;
+  text-align: center;
 }
 
 .user-profile {
@@ -160,11 +151,8 @@
 }
 
 .user-avatar {
-  width: 35px;
-  height: 35px;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.5);
-  object-fit: cover;
 }
 
 .user-name {
@@ -190,9 +178,5 @@
 @media (max-width: 480px) {
   .logo-text {
     display: none;
-  }
-  
-  .notification-btn {
-    font-size: 18px;
   }
 }
