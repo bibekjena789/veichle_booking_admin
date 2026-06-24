@@ -111,12 +111,12 @@ function Vehicles() {
 
       {/* Table */}
 
-      <div className="table-card">
+      <div className="table-card1">
 
-        <div className="table-top">
+        <div className="table-top1">
           <h2>All Vehicles</h2>
 
-          <div className="filters">
+          <div className="filters1">
              <button className="add-btn">+ Add Vehicle</button>
             <select>
               <option>All Status</option>
@@ -126,13 +126,13 @@ function Vehicles() {
               <option>All Types</option>
             </select>
 
-            <button className="filter-btn">
+            <button className="filter-btn1">
               Filter
             </button>
           </div>
         </div>
 
-        <div className="table-wrapper">
+        <div className="table-wrapper1">
 
           <table>
 
@@ -172,7 +172,7 @@ function Vehicles() {
                   </td>
 
                   <td>
-                    <span className="type-badge">
+                    <span className="type-badge1">
                       {item.type}
                     </span>
                   </td>
@@ -200,7 +200,7 @@ function Vehicles() {
                   <td>{item.service}</td>
 
                   <td>
-                    <div className="actions">
+                    <div className="actions1">
                       <FaEye />
                       <FaEdit />
                       <FaTrash />

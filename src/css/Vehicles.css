@@ -104,28 +104,28 @@
 
 /* Table Card */
 
-.table-card {
+.table-card1 {
   background: white;
   border-radius: 18px;
   padding: 20px;
   box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
 }
 
-.table-top {
+.table-top1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
 }
 
-.filters {
+.filters1 {
   display: flex;
   gap: 12px;
   align-items: center;
 }
 
 .filters select,
-.filter-btn {
+.filter-btn1 {
   padding: 10px 15px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
@@ -133,13 +133,13 @@
   cursor: pointer;
 }
 
-.filter-btn:hover {
+.filter-btn:hover1 {
   background: #f3f4f6;
 }
 
 /* Table */
 
-.table-wrapper {
+.table-wrapper1 {
   overflow-x: auto;
 }
 
@@ -151,15 +151,16 @@ table {
 th {
   text-align: center;
   background: #f8fafc;
-  padding: 16px;
+  padding: 12px;
   color: #475569;
   font-weight: 600;
 }
 
 td {
-  padding: 16px;
+  padding: 8px;
   border-bottom: 1px solid #e5e7eb;
   text-align: center;
+  font-size: 14px;
 }
 
 /* Table Row Hover */
@@ -187,7 +188,7 @@ tbody tr:hover td {
 
 .vehicle-img {
   width: 90px;
-  height: 55px;
+  height: 60px;
   object-fit: cover;
   border-radius: 8px;
   border: 1px solid #e5e7eb;
