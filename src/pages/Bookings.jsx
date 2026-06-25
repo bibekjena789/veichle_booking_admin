@@ -11,14 +11,14 @@ import {
   FaEye,
   FaEdit,
   FaTrash,
-  FaChevronDown,
-  FaChevronUp,
   FaDownload,
   FaPrint,
   FaCheckCircle,
   FaTimesCircle,
   FaClock,
-  FaExclamationTriangle
+  FaChartBar,
+  FaCreditCard,
+  FaMoneyBillWave
 } from 'react-icons/fa';
 
 const Bookings = () => {
@@ -176,12 +176,12 @@ const Bookings = () => {
     setExpandedRow(expandedRow === id ? null : id);
   };
 
-  // Stats Data
+  // Stats Data with React Icons
   const stats = [
-    { label: 'Total Bookings', value: '2,568', change: '+12.5%', icon: '📊' },
-    { label: 'Total Refunds', value: '312', change: '+3.2%', icon: '💳' },
-    { label: 'Active Bookings', value: '1,854', change: '+4.6%', icon: '✅' },
-    { label: 'Revenue', value: '$78,540', change: '+7.8%', icon: '💰' },
+    { label: 'Total Bookings', value: '2,568', change: '+12.5%', icon: <FaChartBar /> },
+    { label: 'Total Refunds', value: '312', change: '+3.2%', icon: <FaCreditCard /> },
+    { label: 'Active Bookings', value: '1,854', change: '+4.6%', icon: <FaCheckCircle /> },
+    { label: 'Revenue', value: '$78,540', change: '+7.8%', icon: <FaMoneyBillWave /> },
   ];
 
   return (
