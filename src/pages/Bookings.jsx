@@ -205,7 +205,7 @@ const Bookings = () => {
       {/* Stats Cards */}
       <div className="stats-grid">
         {stats.map((stat, index) => (
-          <div className="stat-card" key={index}>
+          <div className="Booking-card" key={index}>
             <div className="stat-icon">{stat.icon}</div>
             <div className="stat-info">
               <h3>{stat.label}</h3>
