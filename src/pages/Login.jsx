@@ -118,13 +118,10 @@ const Login = () => {
       
       const result = await authService.login(identifier.trim(), password);
       
-      console.log('Login result received:', result);
       
       if (result.success) {
-        console.log('Login successful!');
         
         const userRole = authService.getUserRole();
-        console.log('User role from sessionStorage:', userRole);
         
         if (!userRole || userRole !== 'Veichle_Booking_Controller_Admin') {
           console.error('Invalid role:', userRole);
@@ -135,7 +132,6 @@ const Login = () => {
           return;
         }
 
-        console.log('Login time stored in session');
         setLoading(false);
         navigate('/dashboard', { replace: true });
         
@@ -418,7 +414,7 @@ const Login = () => {
                 <div className="testimonial">
                   <p>"PixiYatra has transformed how we manage our travel business. Highly recommended!"</p>
                   <div className="testimonial-author">
-                    <img src="https://via.placeholder.com/40" alt="User" />
+                    <img src="/pixiyatra.png" alt="User" />
                     <div>
                       <strong>Sarah Johnson</strong>
                       <span>Travel Agency Owner</span>

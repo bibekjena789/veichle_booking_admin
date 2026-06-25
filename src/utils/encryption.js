@@ -7,10 +7,24 @@ class EncryptionService {
   // Encrypt data
   encrypt(data) {
     try {
-      if (typeof data === 'object') {
-        data = JSON.stringify(data);
+      // Handle null or undefined
+      if (data === null || data === undefined) {
+        return null;
       }
-      const encrypted = CryptoJS.AES.encrypt(data, SECRET_KEY).toString();
+      
+      // Convert to string if it's an object
+      let stringData = data;
+      if (typeof data === 'object') {
+        stringData = JSON.stringify(data);
+      }
+      
+      // If it's not a string, convert to string
+      if (typeof stringData !== 'string') {
+        stringData = String(stringData);
+      }
+      
+      // Encrypt the string
+      const encrypted = CryptoJS.AES.encrypt(stringData, SECRET_KEY).toString();
       return encrypted;
     } catch (error) {
       console.error('Encryption error:', error);
@@ -21,8 +35,16 @@ class EncryptionService {
   // Decrypt data
   decrypt(encryptedData) {
     try {
+      if (!encryptedData) {
+        return null;
+      }
+      
       const decrypted = CryptoJS.AES.decrypt(encryptedData, SECRET_KEY);
       const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
+      
+      if (!decryptedString) {
+        return null;
+      }
       
       // Try to parse as JSON
       try {
@@ -39,6 +61,12 @@ class EncryptionService {
   // Encrypt and store in sessionStorage
   setSessionItem(key, data) {
     try {
+      // Skip if data is null or undefined
+      if (data === null || data === undefined) {
+        sessionStorage.removeItem(key);
+        return false;
+      }
+      
       const encrypted = this.encrypt(data);
       if (encrypted) {
         sessionStorage.setItem(key, encrypted);
@@ -75,6 +103,10 @@ class EncryptionService {
 
   // Store token with encryption
   setToken(key, token) {
+    if (!token) {
+      sessionStorage.removeItem(key);
+      return false;
+    }
     return this.setSessionItem(key, token);
   }
 
@@ -85,6 +117,9 @@ class EncryptionService {
 
   // Store user data with encryption
   setUserData(userData) {
+    if (!userData || typeof userData !== 'object') {
+      return false;
+    }
     return this.setSessionItem('user_data', userData);
   }
 
@@ -95,6 +130,9 @@ class EncryptionService {
 
   // Store login history
   setLoginHistory(history) {
+    if (!history || typeof history !== 'object') {
+      return false;
+    }
     return this.setSessionItem('login_history', history);
   }
 
@@ -106,10 +144,16 @@ class EncryptionService {
   // Store multiple items
   setMultipleItems(items) {
     try {
-      for (const [key, value] of Object.entries(items)) {
-        this.setSessionItem(key, value);
+      if (!items || typeof items !== 'object') {
+        return false;
       }
-      return true;
+      
+      let success = true;
+      for (const [key, value] of Object.entries(items)) {
+        const result = this.setSessionItem(key, value);
+        if (!result) success = false;
+      }
+      return success;
     } catch (error) {
       console.error('Error storing multiple items:', error);
       return false;
@@ -119,6 +163,10 @@ class EncryptionService {
   // Get multiple items
   getMultipleItems(keys) {
     try {
+      if (!keys || !Array.isArray(keys)) {
+        return null;
+      }
+      
       const result = {};
       for (const key of keys) {
         result[key] = this.getSessionItem(key);

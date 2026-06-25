@@ -11,20 +11,12 @@ const authApi = axios.create({
   }
 });
 
-// Add request interceptor for logging
-authApi.interceptors.request.use(
-  (config) => {
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
 class AuthService {
   // Login with Email or Phone
   async login(identifier, password) {
     try {
+      console.log('Attempting login with:', { identifier, password: '***' });
+      
       const payload = { 
         identifier: identifier,
         password: password 
@@ -45,10 +37,11 @@ class AuthService {
           
           const userData = data.data;
           
-          if (tokens.access) {
+          if (tokens.access && tokens.access !== 'undefined' && tokens.access !== 'null') {
             // Store encrypted data in sessionStorage
             this.storeEncryptedSessionData(tokens, userData, data);
             
+            console.log('Login successful!');
             
             return {
               success: true,
@@ -57,10 +50,10 @@ class AuthService {
               message: data.message || 'Login successful'
             };
           } else {
-            console.error('No access token in response:', data);
+            console.error('Invalid access token:', tokens.access);
             return {
               success: false,
-              message: 'Invalid response from server. No token received.'
+              message: 'Invalid token received from server.'
             };
           }
         } else {
@@ -82,57 +75,152 @@ class AuthService {
     }
   }
 
+  // Logout from current device
+  async logout() {
+    try {
+      const accessToken = this.getAccessToken();
+      const refreshToken = this.getRefreshToken();
+      
+      if (!accessToken || !refreshToken) {
+        console.log('No tokens found, clearing session');
+        this.clearAll();
+        return { success: true, message: 'Logged out' };
+      }
+
+      const response = await authApi.post(
+        API_CONFIG.endpoints.logout,
+        { refresh: refreshToken },
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      console.log('Logout response:', response.data);
+      
+      // Clear session regardless of response
+      this.clearAll();
+      
+      return {
+        success: true,
+        message: response.data?.message || 'Logged out successfully'
+      };
+      
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Clear session even on error
+      this.clearAll();
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Logout failed'
+      };
+    }
+  }
+
+  // Logout from all devices
+  async logoutAllDevices() {
+    try {
+      const accessToken = this.getAccessToken();
+      const refreshToken = this.getRefreshToken();
+      
+      if (!accessToken || !refreshToken) {
+        console.log('No tokens found, clearing session');
+        this.clearAll();
+        return { success: true, message: 'Logged out from all devices' };
+      }
+
+      const response = await authApi.post(
+        API_CONFIG.endpoints.logoutAllDevices,
+        { refresh: refreshToken },
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      console.log('Logout all devices response:', response.data);
+      
+      // Clear session regardless of response
+      this.clearAll();
+      
+      return {
+        success: true,
+        message: response.data?.message || 'Logged out from all devices successfully',
+        blacklistedTokens: response.data?.blacklisted_tokens || 0
+      };
+      
+    } catch (error) {
+      console.error('Logout all devices error:', error);
+      // Clear session even on error
+      this.clearAll();
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Logout from all devices failed'
+      };
+    }
+  }
+
   // Store encrypted session data
   storeEncryptedSessionData(tokens, userData, responseData) {
     try {
       // Store tokens encrypted
-      encryptionService.setToken('access_token', tokens.access);
-      encryptionService.setToken('refresh_token', tokens.refresh);
+      if (tokens.access) {
+        encryptionService.setToken('access_token', tokens.access);
+      }
+      if (tokens.refresh) {
+        encryptionService.setToken('refresh_token', tokens.refresh);
+      }
       
       // Store user data encrypted
-      const userDataToStore = {
-        user_id: userData.user_id,
-        uuid: userData.uuid,
-        name: userData.name,
-        email: userData.email,
-        phone: userData.phone,
-        role: userData.role,
-        is_active: userData.is_active,
-        is_staff: userData.is_staff,
-        is_superuser: userData.is_superuser,
-        last_ip: userData.last_ip,
-        last_device: userData.last_device,
-        created_at: userData.created_at,
-        updated_at: userData.updated_at
-      };
-      
-      encryptionService.setUserData(userDataToStore);
-      
-      // Store individual user fields for easy access
-      encryptionService.setSessionItem('user_role', userData.role);
-      encryptionService.setSessionItem('user_name', userData.name);
-      encryptionService.setSessionItem('user_email', userData.email);
-      encryptionService.setSessionItem('user_phone', userData.phone);
-      encryptionService.setSessionItem('user_uuid', userData.uuid);
-      encryptionService.setSessionItem('user_id', userData.user_id);
+      if (userData && typeof userData === 'object') {
+        const userDataToStore = {
+          user_id: userData.user_id || null,
+          uuid: userData.uuid || null,
+          name: userData.name || 'User',
+          email: userData.email || null,
+          phone: userData.phone || null,
+          role: userData.role || null,
+          is_active: userData.is_active || false,
+          is_staff: userData.is_staff || false,
+          is_superuser: userData.is_superuser || false,
+          last_ip: userData.last_ip || null,
+          last_device: userData.last_device || navigator.userAgent,
+          created_at: userData.created_at || null,
+          updated_at: userData.updated_at || null
+        };
+        
+        encryptionService.setUserData(userDataToStore);
+        
+        // Store individual user fields for easy access
+        if (userData.role) encryptionService.setSessionItem('user_role', userData.role);
+        if (userData.name) encryptionService.setSessionItem('user_name', userData.name);
+        if (userData.email) encryptionService.setSessionItem('user_email', userData.email);
+        if (userData.phone) encryptionService.setSessionItem('user_phone', userData.phone);
+        if (userData.uuid) encryptionService.setSessionItem('user_uuid', userData.uuid);
+        if (userData.user_id) encryptionService.setSessionItem('user_id', userData.user_id);
+      }
       
       // Store login history
       const loginHistory = {
         timestamp: new Date().toISOString(),
-        user_id: userData.user_id,
-        uuid: userData.uuid,
-        name: userData.name,
-        email: userData.email,
-        phone: userData.phone,
-        role: userData.role,
-        last_ip: userData.last_ip || '192.168.31.76',
-        last_device: userData.last_device || navigator.userAgent,
-        created_at: userData.created_at,
-        updated_at: userData.updated_at,
+        user_id: userData?.user_id || null,
+        uuid: userData?.uuid || null,
+        name: userData?.name || 'User',
+        email: userData?.email || null,
+        phone: userData?.phone || null,
+        role: userData?.role || null,
+        last_ip: userData?.last_ip || '192.168.31.76',
+        last_device: userData?.last_device || navigator.userAgent,
+        created_at: userData?.created_at || null,
+        updated_at: userData?.updated_at || null,
         login_from: 'Browser',
         login_time: new Date().toLocaleString(),
         success: true,
-        message: responseData.message || 'Login successful'
+        message: responseData?.message || 'Login successful'
       };
       
       encryptionService.setLoginHistory(loginHistory);
@@ -176,24 +264,6 @@ class AuthService {
         success: false,
         message: 'Session expired. Please login again.'
       };
-    }
-  }
-
-  // Logout
-  async logout() {
-    try {
-      const accessToken = this.getAccessToken();
-      if (accessToken) {
-        await authApi.post(API_CONFIG.endpoints.logout, {}, {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
-        });
-      }
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      this.clearAll();
     }
   }
 
@@ -267,6 +337,7 @@ class AuthService {
   // Check if user has required role
   hasRole(requiredRole) {
     const userRole = this.getUserRole();
+    console.log('User role:', userRole, 'Required:', requiredRole);
     return userRole === requiredRole;
   }
 

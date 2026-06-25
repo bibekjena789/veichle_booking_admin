@@ -6,6 +6,7 @@ const API_CONFIG = {
     login: '/V1/veichle_booking_controller/web/admin/staff/login/',
     refresh: '/V1/veichle_booking_controller/web/admin/token/refresh/',
     logout: '/V1/veichle_booking_controller/web/admin/staff/logout/',
+    logoutAllDevices: '/V1/veichle_booking_controller/web/admin/staff/logout-from-all-device/',
     profile: '/V1/veichle_booking_controller/web/admin/staff/profile/',
   }
 };
