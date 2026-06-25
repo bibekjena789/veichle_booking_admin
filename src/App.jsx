@@ -2,9 +2,10 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import Layout from './components/Layout';
-import Login from './components/Login';
+import Login from './pages/Login';
+import ProtectedRoute from './components/ProtectedRoute';
 
-// Lazy load pages for faster initial load
+// Lazy load pages
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Vehicles = lazy(() => import('./pages/Vehicles'));
 const Bookings = lazy(() => import('./pages/Bookings'));
@@ -12,7 +13,6 @@ const Reviews = lazy(() => import('./pages/Reviews'));
 const Offers = lazy(() => import('./pages/AddOffer'));
 const Profile = lazy(() => import('./pages/Profile'));
 
-// Loading component
 const LoadingFallback = () => (
   <div className="loading-fallback">
     <div className="loading-spinner"></div>
@@ -25,8 +25,12 @@ function App() {
     <Router>
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
-          <Route path="/" element={<Layout />}>
-          <Route path="login" element={<Login />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={
+            <ProtectedRoute requiredRole="Veichle_Booking_Controller_Admin">
+              <Layout />
+            </ProtectedRoute>
+          }>
             <Route index element={<Dashboard />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="vehicles" element={<Vehicles />} />

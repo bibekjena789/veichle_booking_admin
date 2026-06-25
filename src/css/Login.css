@@ -607,3 +607,202 @@
     flex-direction: column;
   }
 }
+
+/* Add these styles to your existing Login.css */
+
+/* Error Message */
+.error-message {
+  background: #fff5f5;
+  border: 1px solid #fc8181;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #c53030;
+  font-size: 14px;
+}
+
+.error-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* Field Error */
+.field-error {
+  color: #e53e3e;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.form-group input.error {
+  border-color: #fc8181;
+}
+
+.form-group input.error:focus {
+  border-color: #fc8181;
+  box-shadow: 0 0 0 3px rgba(252, 129, 129, 0.15);
+}
+
+.password-input-wrapper.error input {
+  border-color: #fc8181;
+}
+
+.password-input-wrapper.error input:focus {
+  border-color: #fc8181;
+  box-shadow: 0 0 0 3px rgba(252, 129, 129, 0.15);
+}
+
+/* Login Type Toggle */
+.login-type-toggle {
+  display: flex;
+  background: #f7fafc;
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 16px;
+  gap: 4px;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #4a5568;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.toggle-btn:hover {
+  background: rgba(102, 126, 234, 0.05);
+}
+
+.toggle-btn.active {
+  background: white;
+  color: #667eea;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.toggle-btn svg {
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .login-type-toggle {
+    flex-direction: row;
+  }
+  
+  .toggle-btn {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+}
+/* Add these styles to your Login.css */
+
+/* API Status */
+.api-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  margin: 8px 0 12px 0;
+}
+
+.api-status.online {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.api-status.offline {
+  background: #fed7d7;
+  color: #742a2a;
+}
+
+.api-status.checking {
+  background: #fefcbf;
+  color: #744210;
+}
+
+.spinner-small {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #e2e8f0;
+  border-top: 2px solid #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+/* Add this to your Login.css */
+.login-attempts {
+  font-size: 12px;
+  color: #a0aec0;
+  margin-top: 4px;
+}
+
+
+/* Add these styles to your Login.css */
+
+/* Error Boundary */
+.error-boundary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  background: #f7fafc;
+  text-align: center;
+}
+
+.error-boundary h2 {
+  color: #e53e3e;
+  margin-bottom: 10px;
+}
+
+.error-boundary p {
+  color: #718096;
+  margin-bottom: 20px;
+}
+
+.error-boundary button {
+  padding: 10px 24px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.error-boundary button:hover {
+  background: #5a67d8;
+  transform: translateY(-2px);
+}
+/* Add this to your Login.css */
+
+/* Input Hint */
+.input-hint {
+  display: block;
+  font-size: 12px;
+  color: #a0aec0;
+  margin-top: 4px;
+}
+
+/* Remove login type toggle styles if no longer needed */
+.login-type-toggle {
+  display: none;
+}
+

@@ -24,11 +24,8 @@ function Layout() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Preload next page on hover
-  const handleLinkHover = (path) => {
-    // Prefetch the component
-    import(`../pages/${path.charAt(0).toUpperCase() + path.slice(1)}`);
-  };
+  // Remove the prefetch function that's causing the warning
+  // Instead, we'll let React Router handle the lazy loading
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
