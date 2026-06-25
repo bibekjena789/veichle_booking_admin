@@ -78,7 +78,7 @@
 }
 
 .stat-card {
-  background: white;
+  background: rgb(201, 219, 228);
   padding: 20px;
   border-radius: 12px;
   display: flex;
