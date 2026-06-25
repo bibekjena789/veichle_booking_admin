@@ -14,7 +14,8 @@ import {
   FaMobileAlt,
   FaLaptop,
   FaChevronDown,
-  FaChevronUp
+  FaChevronUp,
+  FaSpinner
 } from 'react-icons/fa';
 import authService from '../api/auth';
 import encryptionService from '../utils/encryption';
@@ -22,6 +23,7 @@ import encryptionService from '../utils/encryption';
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const [showLogoutOptions, setShowLogoutOptions] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [logoutType, setLogoutType] = useState(null);
   const navigate = useNavigate();
 
   const menuItems = [
@@ -38,7 +40,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     try {
       const pageName = path.replace('/', '');
       const capitalizedPage = pageName.charAt(0).toUpperCase() + pageName.slice(1);
-      // Use import with try-catch to avoid errors
       import(`../pages/${capitalizedPage}`).catch(() => {});
     } catch (e) {
       // Silently fail
@@ -48,11 +49,14 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   // Handle logout from current device
   const handleLogoutCurrentDevice = async () => {
     setLoading(true);
+    setLogoutType('current');
     try {
       const result = await authService.logout();
       if (result.success) {
-        // Clear all session data
+        // Clear current device session data
         encryptionService.clearSession();
+        // Show success message
+        console.log('Logged out from current device successfully');
         navigate('/login');
       } else {
         console.error('Logout failed:', result.message);
@@ -67,17 +71,33 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     } finally {
       setLoading(false);
       setShowLogoutOptions(false);
+      setLogoutType(null);
     }
   };
 
   // Handle logout from all devices
   const handleLogoutAllDevices = async () => {
     setLoading(true);
+    setLogoutType('all');
     try {
       const result = await authService.logoutAllDevices();
+      
+      console.log('Logout all devices response:', result);
+      
       if (result.success) {
-        // Clear all session data
+        // Clear current device session data
         encryptionService.clearSession();
+        
+        // Show success message with number of blacklisted tokens
+        const message = result.blacklistedTokens > 0 
+          ? `Logged out from all devices successfully. ${result.blacklistedTokens} sessions were terminated.`
+          : 'Logged out from all devices successfully.';
+        
+        console.log(message);
+        
+        // You can show a toast notification here if you have one
+        alert(message);
+        
         navigate('/login');
       } else {
         console.error('Logout all devices failed:', result.message);
@@ -92,11 +112,14 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     } finally {
       setLoading(false);
       setShowLogoutOptions(false);
+      setLogoutType(null);
     }
   };
 
   const toggleLogoutOptions = () => {
-    setShowLogoutOptions(!showLogoutOptions);
+    if (!loading) {
+      setShowLogoutOptions(!showLogoutOptions);
+    }
   };
 
   return (
@@ -158,16 +181,22 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               disabled={loading}
             >
               <span className="sidebar-icon">
-                <FaSignOutAlt />
+                {loading ? <FaSpinner className="spinning" /> : <FaSignOutAlt />}
               </span>
               {isOpen && (
                 <>
                   <span className="sidebar-label">
-                    {loading ? 'Logging out...' : 'Logout'}
+                    {loading ? (
+                      logoutType === 'all' ? 'Logging out all devices...' : 'Logging out...'
+                    ) : (
+                      'Logout'
+                    )}
                   </span>
-                  <span className="dropdown-arrow-icon">
-                    {showLogoutOptions ? <FaChevronUp /> : <FaChevronDown />}
-                  </span>
+                  {!loading && (
+                    <span className="dropdown-arrow-icon">
+                      {showLogoutOptions ? <FaChevronUp /> : <FaChevronDown />}
+                    </span>
+                  )}
                 </>
               )}
             </button>
@@ -176,6 +205,16 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           {/* Dropdown Options */}
           {isOpen && showLogoutOptions && !loading && (
             <div className="logout-dropdown">
+              <div className="logout-dropdown-header">
+                <span className="dropdown-title">Logout Options</span>
+                <button 
+                  className="dropdown-close"
+                  onClick={() => setShowLogoutOptions(false)}
+                >
+                  ✕
+                </button>
+              </div>
+              
               <button 
                 className="logout-option"
                 onClick={handleLogoutCurrentDevice}
@@ -198,6 +237,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                   <span className="option-title">Logout All Devices</span>
                   <span className="option-subtitle">Logout from all active sessions</span>
                 </div>
+                {/* <span className="option-badge">Recommended</span> */}
               </button>
             </div>
           )}

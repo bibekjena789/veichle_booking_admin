@@ -4,7 +4,8 @@ const API_CONFIG = {
   timeout: 30000,
   endpoints: {
     login: '/V1/veichle_booking_controller/web/admin/staff/login/',
-    refresh: '/V1/veichle_booking_controller/web/admin/token/refresh/',
+    refresh: '/V1/veichle_booking_controller/web/admin/staff/token/token-refresh/',
+    verify: '/V1/veichle_booking_controller/web/admin/staff/token/token-verify/',
     logout: '/V1/veichle_booking_controller/web/admin/staff/logout/',
     logoutAllDevices: '/V1/veichle_booking_controller/web/admin/staff/logout-from-all-device/',
     profile: '/V1/veichle_booking_controller/web/admin/staff/profile/',

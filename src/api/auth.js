@@ -11,6 +11,38 @@ const authApi = axios.create({
   }
 });
 
+// Add response interceptor for token refresh
+authApi.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    // If error is 401 and we haven't tried to refresh yet
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        // Try to refresh the token
+        const refreshResult = await authService.refreshToken();
+        
+        if (refreshResult.success) {
+          // Update the Authorization header
+          originalRequest.headers.Authorization = `Bearer ${refreshResult.access}`;
+          // Retry the original request
+          return authApi(originalRequest);
+        }
+      } catch (refreshError) {
+        // Refresh failed - redirect to login
+        authService.clearAll();
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 class AuthService {
   // Login with Email or Phone
   async login(identifier, password) {
@@ -72,6 +104,97 @@ class AuthService {
     } catch (error) {
       console.error('Login error:', error);
       return this.handleError(error);
+    }
+  }
+
+  // Verify Token
+  async verifyToken(token) {
+    try {
+      const response = await authApi.post(API_CONFIG.endpoints.verify, {
+        token: token
+      });
+
+      console.log('Token verify response:', response.data);
+
+      if (response.status === 200 && response.data.status === true) {
+        return {
+          success: true,
+          data: response.data.data,
+          message: response.data.message || 'Token is valid'
+        };
+      }
+
+      return {
+        success: false,
+        message: response.data.message || 'Invalid token'
+      };
+    } catch (error) {
+      console.error('Token verify error:', error);
+      return this.handleError(error);
+    }
+  }
+
+  // Refresh Token
+  async refreshToken() {
+    try {
+      const refreshToken = this.getRefreshToken();
+      
+      if (!refreshToken) {
+        console.log('No refresh token available');
+        this.clearAll();
+        return {
+          success: false,
+          message: 'No refresh token available'
+        };
+      }
+
+      console.log('Attempting to refresh token...');
+      
+      const response = await authApi.post(API_CONFIG.endpoints.refresh, {
+        refresh: refreshToken
+      });
+
+      console.log('Token refresh response:', response.data);
+
+      if (response.status === 200 && response.data.status === true) {
+        const tokens = {
+          access: response.data.tokens?.access,
+          refresh: response.data.tokens?.refresh
+        };
+
+        if (tokens.access && tokens.refresh) {
+          // Store new tokens
+          encryptionService.setToken('access_token', tokens.access);
+          encryptionService.setToken('refresh_token', tokens.refresh);
+          
+          // Update user data if provided
+          if (response.data.data) {
+            this.setUserData(response.data.data);
+          }
+
+          console.log('Token refreshed successfully');
+          
+          return {
+            success: true,
+            access: tokens.access,
+            refresh: tokens.refresh,
+            data: response.data.data,
+            message: response.data.message || 'Token refreshed successfully'
+          };
+        }
+      }
+
+      return {
+        success: false,
+        message: response.data.message || 'Failed to refresh token'
+      };
+    } catch (error) {
+      console.error('Token refresh error:', error);
+      this.clearAll();
+      return {
+        success: false,
+        message: 'Session expired. Please login again.'
+      };
     }
   }
 
@@ -176,33 +299,7 @@ class AuthService {
       }
       
       // Store user data encrypted
-      if (userData && typeof userData === 'object') {
-        const userDataToStore = {
-          user_id: userData.user_id || null,
-          uuid: userData.uuid || null,
-          name: userData.name || 'User',
-          email: userData.email || null,
-          phone: userData.phone || null,
-          role: userData.role || null,
-          is_active: userData.is_active || false,
-          is_staff: userData.is_staff || false,
-          is_superuser: userData.is_superuser || false,
-          last_ip: userData.last_ip || null,
-          last_device: userData.last_device || navigator.userAgent,
-          created_at: userData.created_at || null,
-          updated_at: userData.updated_at || null
-        };
-        
-        encryptionService.setUserData(userDataToStore);
-        
-        // Store individual user fields for easy access
-        if (userData.role) encryptionService.setSessionItem('user_role', userData.role);
-        if (userData.name) encryptionService.setSessionItem('user_name', userData.name);
-        if (userData.email) encryptionService.setSessionItem('user_email', userData.email);
-        if (userData.phone) encryptionService.setSessionItem('user_phone', userData.phone);
-        if (userData.uuid) encryptionService.setSessionItem('user_uuid', userData.uuid);
-        if (userData.user_id) encryptionService.setSessionItem('user_id', userData.user_id);
-      }
+      this.setUserData(userData);
       
       // Store login history
       const loginHistory = {
@@ -234,36 +331,34 @@ class AuthService {
     }
   }
 
-  // Refresh Token
-  async refreshToken() {
-    try {
-      const refreshToken = this.getRefreshToken();
-      if (!refreshToken) {
-        throw new Error('No refresh token available');
-      }
-
-      const response = await authApi.post(API_CONFIG.endpoints.refresh, {
-        refresh: refreshToken
-      });
-
-      if (response.data.access) {
-        encryptionService.setToken('access_token', response.data.access);
-        return {
-          success: true,
-          access: response.data.access
-        };
-      }
-
-      return {
-        success: false,
-        message: 'Failed to refresh token'
+  // Set user data
+  setUserData(userData) {
+    if (userData && typeof userData === 'object') {
+      const userDataToStore = {
+        user_id: userData.user_id || null,
+        uuid: userData.uuid || null,
+        name: userData.name || 'User',
+        email: userData.email || null,
+        phone: userData.phone || null,
+        role: userData.role || null,
+        is_active: userData.is_active || false,
+        is_staff: userData.is_staff || false,
+        is_superuser: userData.is_superuser || false,
+        last_ip: userData.last_ip || null,
+        last_device: userData.last_device || navigator.userAgent,
+        created_at: userData.created_at || null,
+        updated_at: userData.updated_at || null
       };
-    } catch (error) {
-      this.clearAll();
-      return {
-        success: false,
-        message: 'Session expired. Please login again.'
-      };
+      
+      encryptionService.setUserData(userDataToStore);
+      
+      // Store individual user fields for easy access
+      if (userData.role) encryptionService.setSessionItem('user_role', userData.role);
+      if (userData.name) encryptionService.setSessionItem('user_name', userData.name);
+      if (userData.email) encryptionService.setSessionItem('user_email', userData.email);
+      if (userData.phone) encryptionService.setSessionItem('user_phone', userData.phone);
+      if (userData.uuid) encryptionService.setSessionItem('user_uuid', userData.uuid);
+      if (userData.user_id) encryptionService.setSessionItem('user_id', userData.user_id);
     }
   }
 
@@ -332,6 +427,16 @@ class AuthService {
       console.error('Error checking token:', error);
       return false;
     }
+  }
+
+  // Verify current session
+  async verifyCurrentSession() {
+    const token = this.getAccessToken();
+    if (!token) {
+      return { success: false, message: 'No token found' };
+    }
+
+    return this.verifyToken(token);
   }
 
   // Check if user has required role
@@ -410,6 +515,10 @@ class AuthService {
             errorMsg = `Identifier: ${Array.isArray(data.identifier) ? data.identifier[0] : data.identifier}`;
           } else if (data.password) {
             errorMsg = `Password: ${Array.isArray(data.password) ? data.password[0] : data.password}`;
+          } else if (data.token) {
+            errorMsg = `Token: ${Array.isArray(data.token) ? data.token[0] : data.token}`;
+          } else if (data.refresh) {
+            errorMsg = `Refresh: ${Array.isArray(data.refresh) ? data.refresh[0] : data.refresh}`;
           }
           return {
             success: false,
@@ -422,6 +531,15 @@ class AuthService {
               success: false,
               message: data.message,
               code: 'ACCOUNT_LOCKED'
+            };
+          }
+          if (data.message === 'Invalid or expired access token.' || 
+              data.message === 'Refresh token is invalid, expired, or blacklisted.') {
+            // Token expired - try to refresh
+            return {
+              success: false,
+              message: data.message,
+              code: 'TOKEN_EXPIRED'
             };
           }
           return {

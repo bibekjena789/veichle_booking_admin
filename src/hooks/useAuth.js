@@ -13,19 +13,48 @@ const useAuth = () => {
     checkAuth();
   }, []);
 
-  const checkAuth = useCallback(() => {
-    const authenticated = authService.isAuthenticated();
-    setIsAuthenticated(authenticated);
-    
-    if (authenticated) {
-      const userData = authService.getUserData();
-      setUser(userData);
-      setUserRole(authService.getUserRole());
-    } else {
+  const checkAuth = useCallback(async () => {
+    setLoading(true);
+    try {
+      const authenticated = authService.isAuthenticated();
+      setIsAuthenticated(authenticated);
+      
+      if (authenticated) {
+        // Verify token with server
+        const verifyResult = await authService.verifyCurrentSession();
+        
+        if (verifyResult.success) {
+          const userData = authService.getUserData();
+          setUser(userData);
+          setUserRole(authService.getUserRole());
+          setIsAuthenticated(true);
+        } else {
+          // Token invalid - try to refresh
+          const refreshResult = await authService.refreshToken();
+          if (refreshResult.success) {
+            const userData = authService.getUserData();
+            setUser(userData);
+            setUserRole(authService.getUserRole());
+            setIsAuthenticated(true);
+          } else {
+            authService.clearAll();
+            setIsAuthenticated(false);
+            setUser(null);
+            setUserRole(null);
+          }
+        }
+      } else {
+        setUser(null);
+        setUserRole(null);
+      }
+    } catch (error) {
+      console.error('Auth check error:', error);
       setUser(null);
       setUserRole(null);
+      setIsAuthenticated(false);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   const login = useCallback(async (identifier, password) => {
@@ -57,6 +86,21 @@ const useAuth = () => {
     navigate('/login');
   }, [navigate]);
 
+  const refreshToken = useCallback(async () => {
+    const result = await authService.refreshToken();
+    if (result.success) {
+      const userData = authService.getUserData();
+      setUser(userData);
+      setUserRole(authService.getUserRole());
+      setIsAuthenticated(true);
+    }
+    return result;
+  }, []);
+
+  const verifyToken = useCallback(async (token) => {
+    return authService.verifyToken(token);
+  }, []);
+
   const getUserData = useCallback(() => {
     return authService.getUserData();
   }, []);
@@ -85,6 +129,8 @@ const useAuth = () => {
     login,
     logout,
     checkAuth,
+    refreshToken,
+    verifyToken,
     getUserData,
     getUserName,
     getUserEmail,
