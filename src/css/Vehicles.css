@@ -104,28 +104,28 @@
 
 /* Table Card */
 
-.table-card {
+.table-card1 {
   background: white;
   border-radius: 18px;
   padding: 20px;
   box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
 }
 
-.table-top {
+.table-top1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
 }
 
-.filters {
+.filters1 {
   display: flex;
   gap: 12px;
   align-items: center;
 }
 
 .filters select,
-.filter-btn {
+.filter-btn1 {
   padding: 10px 15px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
@@ -133,33 +133,35 @@
   cursor: pointer;
 }
 
-.filter-btn:hover {
+.filter-btn1:hover {
   background: #f3f4f6;
 }
 
 /* Table */
 
-.table-wrapper {
+.table-wrapper1 {
   overflow-x: auto;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 th {
   text-align: center;
   background: #f8fafc;
-  padding: 16px;
+  padding: 12px;
   color: #475569;
   font-weight: 600;
 }
 
 td {
-  padding: 16px;
+  padding: 8px;
   border-bottom: 1px solid #e5e7eb;
   text-align: center;
+  font-size: 14px;
 }
 
 /* Table Row Hover */
@@ -182,12 +184,13 @@ tbody tr:hover td {
 .vehicle-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  min-width: 180px;
 }
 
 .vehicle-img {
   width: 90px;
-  height: 55px;
+  height: 60px;
   object-fit: cover;
   border-radius: 8px;
   border: 1px solid #e5e7eb;
@@ -210,7 +213,7 @@ tbody tr:hover td {
 
 /* Type Badge */
 
-.type-badge {
+.type-badge1 {
   background: #e0f2fe;
   color: #0284c7;
   padding: 6px 12px;
@@ -249,19 +252,19 @@ tbody tr:hover td {
 
 /* Actions */
 
-.actions {
+.actions1 {
   display: flex;
   justify-content: center;
   gap: 12px;
 }
 
-.actions svg {
+.actions1 svg {
   cursor: pointer;
   transition: all 0.3s ease;
   color: #64748b;
 }
 
-.actions svg:hover {
+.actions1 svg:hover {
   color: #0ea5a4;
   transform: scale(1.2);
 }
@@ -273,7 +276,7 @@ tbody tr:hover td {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .table-top {
+  .table-top1 {
     flex-direction: column;
     align-items: flex-start;
     gap: 15px;
@@ -285,7 +288,7 @@ tbody tr:hover td {
     grid-template-columns: 1fr;
   }
 
-  .filters {
+  .filters1 {
     flex-wrap: wrap;
   }
 

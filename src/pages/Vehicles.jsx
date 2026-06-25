@@ -11,8 +11,11 @@ import {
   FaUserFriends,
 } from "react-icons/fa";
 import '../css/Vehicles.css';
-import toyotaInnova from "../assets/Vehivlesimages/Toyota_Innova_Crysta.jpg";
-
+import toyotaInnova from "../assets/Vehiclesimages/Toyota_Innova_Crysta.jpg";
+import hondaCity from "../assets/Vehiclesimages/Honda_City.jpg";
+import suzukiSwift from "../assets/Vehiclesimages/maruti-suzuki-dzire.jpg";
+import mahindraXuv from "../assets/Vehiclesimages/mahindra_xuv.jpg";
+import forceTraveller from "../assets/Vehiclesimages/force-traveller.jpg";
 function Vehicles() {
   const vehicles = [
     {
@@ -35,6 +38,7 @@ function Vehicles() {
       year: 2022,
       status: "Active",
       service: "18 May 2024",
+      image:hondaCity,
     },
     {
       name: "Maruti Suzuki Swift",
@@ -45,6 +49,7 @@ function Vehicles() {
       year: 2020,
       status: "Under Maintenance",
       service: "15 May 2024",
+      image:suzukiSwift,
     },
     {
       name: "Mahindra XUV500",
@@ -55,6 +60,7 @@ function Vehicles() {
       year: 2019,
       status: "Active",
       service: "10 May 2024",
+      image:mahindraXuv,
     },
     {
       name: "Force Traveller",
@@ -65,6 +71,7 @@ function Vehicles() {
       year: 2018,
       status: "Inactive",
       service: "02 May 2024",
+      image:forceTraveller,
     },
   ];
 
@@ -111,12 +118,12 @@ function Vehicles() {
 
       {/* Table */}
 
-      <div className="table-card">
+      <div className="table-card1">
 
-        <div className="table-top">
+        <div className="table-top1">
           <h2>All Vehicles</h2>
 
-          <div className="filters">
+          <div className="filters1">
              <button className="add-btn">+ Add Vehicle</button>
             <select>
               <option>All Status</option>
@@ -126,13 +133,13 @@ function Vehicles() {
               <option>All Types</option>
             </select>
 
-            <button className="filter-btn">
+            <button className="filter-btn1">
               Filter
             </button>
           </div>
         </div>
 
-        <div className="table-wrapper">
+        <div className="table-wrapper1">
 
           <table>
 
@@ -172,7 +179,7 @@ function Vehicles() {
                   </td>
 
                   <td>
-                    <span className="type-badge">
+                    <span className="type-badge1">
                       {item.type}
                     </span>
                   </td>
@@ -200,7 +207,7 @@ function Vehicles() {
                   <td>{item.service}</td>
 
                   <td>
-                    <div className="actions">
+                    <div className="actions1">
                       <FaEye />
                       <FaEdit />
                       <FaTrash />

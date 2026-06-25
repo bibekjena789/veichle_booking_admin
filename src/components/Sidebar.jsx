@@ -44,8 +44,12 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <button className="sidebar-toggle" onClick={toggleSidebar} aria-label="Toggle sidebar">
             {isOpen ? <FaChevronLeft /> : <FaChevronRight />}
           </button>
-          <span className="sidebar-logo-icon">✈️</span>
-          {isOpen && <span className="sidebar-logo-text">Travoa</span>}
+          <img 
+            src="/pixiyatra.png" 
+            alt="PixiYatra Logo" 
+            className="sidebar-logo-image"
+          />
+          {isOpen && <span className="sidebar-logo-text">Pixiyatra</span>}
         </div>
         {isOpen && <p className="sidebar-tagline">Explore the world</p>}
       </div>
