@@ -16,10 +16,10 @@ import {
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const menuItems = [
     { icon: FaTachometerAlt, label: 'Dashboard', path: '/dashboard' },
-    { icon: FaCalendarAlt, label: 'Bookings', path: '/bookings' },
-    { icon: FaStar, label: 'Reviews', path: '/reviews' },
-    { icon: FaGift, label: 'Add Offer', path: '/offers' },
     { icon: FaCar, label: 'Vehicles', path: '/vehicles' },
+    { icon: FaCalendarAlt, label: 'Bookings', path: '/bookings' },
+    { icon: FaGift, label: 'Add Offer', path: '/offers' },
+    { icon: FaStar, label: 'Reviews', path: '/reviews' },
     { icon: FaUser, label: 'Profile', path: '/profile' },
   ];
 
