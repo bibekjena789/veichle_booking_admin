@@ -346,6 +346,33 @@ function Vehicles() {
           <h2>All Vehicles</h2>
 
           <div className="filters1">
+<<<<<<< HEAD
+             <button className="add-btn">+ Add Vehicle</button>
+{/* Status Filter */}
+<select className="filter-select">
+  <option value="all">All Status</option>
+  <option value="active">Active</option>
+  <option value="maintenance">Under Maintenance</option>
+  <option value="inactive">Inactive</option>
+</select>
+
+{/* Vehicle Type Filter */}
+<select className="filter-select">
+  <option value="all">All Types</option>
+  <option value="suv">SUV</option>
+  <option value="sedan">Sedan</option>
+  <option value="hatchback">Hatchback</option>
+  <option value="van">Van</option>
+  <option value="luxury">Luxury</option>
+  <option value="electric">Electric</option>
+</select>
+
+<button className="filter-btn1">
+  Filter
+</button>
+            <button className="filter-btn1">
+              Filter
+=======
             <div className="search-box">
               <FaSearch className="search-icon" />
               <input
@@ -367,6 +394,7 @@ function Vehicles() {
 
             <button className="add-btn" onClick={() => setShowAddModal(true)}>
               <FaPlus /> Add Vehicle
+>>>>>>> be4d0a5105db8495ef322934ba94a8539267a34a
             </button>
           </div>
         </div>
