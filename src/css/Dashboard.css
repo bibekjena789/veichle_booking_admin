@@ -1,4 +1,4 @@
-.dashboard {
+.pixiyatra-dashboard-main-container {
   padding: 12px;
   background: #f7f8fc;
   min-height: calc(100vh - 90px);
@@ -6,7 +6,7 @@
 
 /* HERO */
 
-.hero-section {
+.pixiyatra-dashboard-hero-banner-section {
   height: 210px;
   border-radius: 20px;
   overflow: hidden;
@@ -15,30 +15,29 @@
     center/cover no-repeat;
 }
 
-.hero-overlay {
+.pixiyatra-dashboard-hero-banner-overlay {
   width: 100%;
   height: 100%;
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(2px);
   padding: 20px 30px;
 }
 
-.hero-overlay h1 {
+.pixiyatra-dashboard-hero-banner-overlay h1 {
   font-size: 28px;
   font-weight: 600;
   color: #222;
   line-height: 1;
-  text-align:left;
-
+  text-align: left;
 }
 
-.hero-overlay span {
+.pixiyatra-dashboard-hero-banner-overlay span {
   color: #7c4dff;
 }
 
 /* SEARCH */
 
-.search-box {
+.pixiyatra-dashboard-flight-search-container {
   position: absolute;
   left: 20px;
   right: 20px;
@@ -49,26 +48,26 @@
   grid-template-columns: repeat(6, 1fr);
   align-items: center;
   padding: 12px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
-.search-item {
+.pixiyatra-dashboard-flight-search-item {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.search-item label {
+.pixiyatra-dashboard-flight-search-item label {
   font-size: 11px;
   color: #888;
 }
 
-.search-item p {
+.pixiyatra-dashboard-flight-search-item p {
   font-size: 12px;
   font-weight: 500;
 }
 
-.search-btn {
+.pixiyatra-dashboard-flight-search-button {
   width: 45px;
   height: 45px;
   border: none;
@@ -80,38 +79,38 @@
 
 /* STATS */
 
-.stats-grid {
+.pixiyatra-dashboard-statistics-grid-container {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
   margin-top: 15px;
 }
 
-.stat-card {
+.pixiyatra-dashboard-single-statistics-card {
   background: #fff;
   border-radius: 16px;
   padding: 14px;
-  box-shadow: 0 5px 15px rgba(0,0,0,.05);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, .05);
 }
 
-.stat-card h5 {
+.pixiyatra-dashboard-single-statistics-card h5 {
   font-size: 12px;
   color: #777;
 }
 
-.stat-card h2 {
+.pixiyatra-dashboard-single-statistics-card h2 {
   font-size: 22px;
   margin: 5px 0;
 }
 
-.stat-card span {
+.pixiyatra-dashboard-single-statistics-card span {
   font-size: 12px;
   color: #6c63ff;
 }
 
 /* MAIN GRID */
 
-.dashboard-grid {
+.pixiyatra-dashboard-content-main-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 15px;
@@ -121,87 +120,88 @@
 
 /* COMMON CARD */
 
-.section-card {
+.pixiyatra-dashboard-common-section-card {
   background: #fff;
   border-radius: 18px;
   padding: 12px;
-  box-shadow: 0 5px 15px rgba(0,0,0,.05);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, .05);
 }
 
-.section-header {
+.pixiyatra-dashboard-common-section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
 }
 
-.section-header h3 {
+.pixiyatra-dashboard-common-section-header h3 {
   font-size: 16px;
   font-weight: 600;
 }
 
-.section-header a {
+.pixiyatra-dashboard-common-section-header a {
   text-decoration: none;
   color: #6c63ff;
   font-size: 12px;
 }
 
-/* LEFT SIDE */
+/* LEFT */
 
-.left-side {
+.pixiyatra-dashboard-left-content-panel {
   width: 100%;
 }
 
-.left-side .section-card {
+.pixiyatra-dashboard-left-content-panel
+  .pixiyatra-dashboard-common-section-card {
   min-height: 260px;
 }
 
-/* TRIPS */
+/* TRIP CARD */
 
-.trip-card {
+.pixiyatra-dashboard-upcoming-trip-card {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 8px 0;
 }
 
-.trip-card img {
+.pixiyatra-dashboard-upcoming-trip-card img {
   width: 90px;
   height: 60px;
   border-radius: 10px;
   object-fit: cover;
 }
 
-.trip-card h4 {
+.pixiyatra-dashboard-upcoming-trip-card h4 {
   font-size: 14px;
   margin-bottom: 4px;
 }
 
-.trip-card p {
+.pixiyatra-dashboard-upcoming-trip-card p {
   font-size: 12px;
   color: #666;
 }
 
-.status {
+.pixiyatra-dashboard-trip-status-badge {
   margin-left: auto;
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 11px;
 }
 
-.confirmed {
+.pixiyatra-dashboard-trip-status-confirmed {
   background: #dff6e5;
   color: #14a44d;
 }
 
-.pending {
+.pixiyatra-dashboard-trip-status-pending {
   background: #fff2d8;
   color: #ff9800;
 }
 
-/* RIGHT SIDE */
+/* RIGHT */
 
-.right-side {
+.pixiyatra-dashboard-right-content-panel {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -209,24 +209,24 @@
 
 /* DESTINATIONS */
 
-.destinations {
+.pixiyatra-dashboard-popular-destination-wrapper {
   display: flex;
   justify-content: space-between;
   gap: 8px;
 }
 
-.destination {
+.pixiyatra-dashboard-single-destination-card {
   position: relative;
 }
 
-.destination img {
+.pixiyatra-dashboard-single-destination-card img {
   width: 90px;
   height: 75px;
   border-radius: 12px;
   object-fit: cover;
 }
 
-.destination span {
+.pixiyatra-dashboard-single-destination-card span {
   position: absolute;
   bottom: 6px;
   left: 6px;
@@ -237,11 +237,11 @@
 
 /* OFFER */
 
-.offer-card {
+.pixiyatra-dashboard-special-offer-card {
   padding: 12px;
 }
 
-.offer-card img {
+.pixiyatra-dashboard-special-offer-card img {
   width: 100%;
   height: 70px;
   object-fit: cover;
@@ -249,7 +249,7 @@
   margin-top: 8px;
 }
 
-.discount {
+.pixiyatra-dashboard-offer-discount-badge {
   display: inline-block;
   margin-top: 8px;
   padding: 3px 8px;
@@ -259,12 +259,12 @@
   font-size: 10px;
 }
 
-.offer-details h4 {
+.pixiyatra-dashboard-special-offer-details h4 {
   font-size: 13px;
   margin-top: 6px;
 }
 
-.offer-details h2 {
+.pixiyatra-dashboard-special-offer-details h2 {
   font-size: 18px;
   color: #6c63ff;
   margin-top: 3px;
@@ -273,26 +273,26 @@
 /* MOBILE */
 
 @media (max-width: 992px) {
-  .search-box {
+  .pixiyatra-dashboard-flight-search-container {
     position: static;
     grid-template-columns: 1fr;
     gap: 12px;
     margin-top: 15px;
   }
 
-  .stats-grid {
+  .pixiyatra-dashboard-statistics-grid-container {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .dashboard-grid {
+  .pixiyatra-dashboard-content-main-grid {
     grid-template-columns: 1fr;
   }
 
-  .hero-section {
+  .pixiyatra-dashboard-hero-banner-section {
     height: auto;
   }
 
-  .destination img {
+  .pixiyatra-dashboard-single-destination-card img {
     width: 100%;
     height: 100px;
   }
