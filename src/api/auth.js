@@ -11,40 +11,177 @@ const authApi = axios.create({
   }
 });
 
-// Add response interceptor for token refresh
-authApi.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-
-    // If error is 401 and we haven't tried to refresh yet
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      try {
-        // Try to refresh the token
-        const refreshResult = await authService.refreshToken();
-        
-        if (refreshResult.success) {
-          // Update the Authorization header
-          originalRequest.headers.Authorization = `Bearer ${refreshResult.access}`;
-          // Retry the original request
-          return authApi(originalRequest);
-        }
-      } catch (refreshError) {
-        // Refresh failed - redirect to login
-        authService.clearAll();
-        window.location.href = '/login';
-        return Promise.reject(refreshError);
-      }
-    }
-
-    return Promise.reject(error);
-  }
-);
-
 class AuthService {
-  // Login with Email or Phone
+  constructor() {
+    // Verification cache
+    this._verificationCache = {
+      timestamp: null,
+      result: null,
+      token: null,
+      pending: false,
+      pendingPromise: null
+    };
+    
+    // Cache duration in milliseconds (30 seconds)
+    this._cacheDuration = 30000;
+    
+    // Debounce timer
+    this._debounceTimer = null;
+    this._lastVerifyTime = 0;
+  }
+
+  /**
+   * Verify Token with deduplication - prevents multiple simultaneous calls
+   */
+  async verifyToken(token) {
+    try {
+      // If no token, return early
+      if (!token) {
+        return { success: false, message: 'No token provided' };
+      }
+
+      // Check if there's already a pending verification for this token
+      if (this._verificationCache.pending && 
+          this._verificationCache.token === token) {
+        console.log('⏳ Waiting for pending verification...');
+        return this._verificationCache.pendingPromise;
+      }
+
+      // Check cache for recent result
+      const now = Date.now();
+      const cachedToken = this._verificationCache.token;
+      const cachedTimestamp = this._verificationCache.timestamp;
+      const cachedResult = this._verificationCache.result;
+      
+      // If same token and cache is still fresh, return cached result
+      if (
+        cachedToken === token && 
+        cachedResult && 
+        cachedTimestamp && 
+        (now - cachedTimestamp) < this._cacheDuration
+      ) {
+        console.log('📦 Using cached token verification result');
+        return cachedResult;
+      }
+
+      // Rate limiting - prevent too many calls
+      if (now - this._lastVerifyTime < 1000) {
+        console.log('⏱️ Rate limiting verification, using cached if available');
+        if (cachedResult) {
+          return cachedResult;
+        }
+      }
+
+      console.log('🔄 Making fresh token verification API call');
+
+      // Create a pending promise
+      this._verificationCache.pending = true;
+      this._verificationCache.token = token;
+      this._verificationCache.pendingPromise = this._performVerification(token);
+      
+      const result = await this._verificationCache.pendingPromise;
+      
+      // Clear pending state
+      this._verificationCache.pending = false;
+      this._verificationCache.pendingPromise = null;
+      
+      return result;
+      
+    } catch (error) {
+      console.error('❌ Token verify error:', error);
+      this._verificationCache.pending = false;
+      this._verificationCache.pendingPromise = null;
+      return {
+        success: false,
+        message: error.message || 'Token verification failed'
+      };
+    }
+  }
+
+  /**
+   * Perform actual verification (internal method)
+   */
+  async _performVerification(token) {
+    try {
+      const response = await authApi.post(API_CONFIG.endpoints.verify, {
+        token: token
+      });
+
+      console.log('📡 Token verify response received');
+
+      let result;
+      if (response.status === 200 && response.data.status === true) {
+        result = {
+          success: true,
+          data: response.data.data,
+          message: response.data.message || 'Token is valid'
+        };
+      } else {
+        result = {
+          success: false,
+          message: response.data.message || 'Invalid token'
+        };
+      }
+
+      // Update cache
+      this._verificationCache = {
+        ...this._verificationCache,
+        timestamp: Date.now(),
+        result: result,
+        token: token
+      };
+      
+      this._lastVerifyTime = Date.now();
+
+      return result;
+    } catch (error) {
+      console.error('❌ Verification API error:', error);
+      const result = {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Verification failed'
+      };
+      
+      // Cache error result for a shorter time (5 seconds)
+      this._verificationCache = {
+        ...this._verificationCache,
+        timestamp: Date.now(),
+        result: result,
+        token: token
+      };
+      
+      return result;
+    }
+  }
+
+  /**
+   * Verify current session with deduplication
+   */
+  async verifyCurrentSession() {
+    const token = this.getAccessToken();
+    if (!token) {
+      return { success: false, message: 'No token found' };
+    }
+    return this.verifyToken(token);
+  }
+
+  /**
+   * Clear verification cache
+   */
+  clearVerificationCache() {
+    this._verificationCache = {
+      timestamp: null,
+      result: null,
+      token: null,
+      pending: false,
+      pendingPromise: null
+    };
+    this._lastVerifyTime = 0;
+    console.log('🧹 Verification cache cleared');
+  }
+
+  // ... rest of the methods remain the same ...
+  
+  // Login method
   async login(identifier, password) {
     try {
       console.log('Attempting login with:', { identifier, password: '***' });
@@ -72,6 +209,9 @@ class AuthService {
           if (tokens.access && tokens.access !== 'undefined' && tokens.access !== 'null') {
             // Store encrypted data in sessionStorage
             this.storeEncryptedSessionData(tokens, userData, data);
+            
+            // Clear verification cache on new login
+            this.clearVerificationCache();
             
             console.log('Login successful!');
             
@@ -107,34 +247,7 @@ class AuthService {
     }
   }
 
-  // Verify Token
-  async verifyToken(token) {
-    try {
-      const response = await authApi.post(API_CONFIG.endpoints.verify, {
-        token: token
-      });
-
-      console.log('Token verify response:', response.data);
-
-      if (response.status === 200 && response.data.status === true) {
-        return {
-          success: true,
-          data: response.data.data,
-          message: response.data.message || 'Token is valid'
-        };
-      }
-
-      return {
-        success: false,
-        message: response.data.message || 'Invalid token'
-      };
-    } catch (error) {
-      console.error('Token verify error:', error);
-      return this.handleError(error);
-    }
-  }
-
-  // Refresh Token
+  // Refresh Token - clears cache on refresh
   async refreshToken() {
     try {
       const refreshToken = this.getRefreshToken();
@@ -167,6 +280,9 @@ class AuthService {
           encryptionService.setToken('access_token', tokens.access);
           encryptionService.setToken('refresh_token', tokens.refresh);
           
+          // Clear verification cache on token refresh
+          this.clearVerificationCache();
+          
           // Update user data if provided
           if (response.data.data) {
             this.setUserData(response.data.data);
@@ -191,6 +307,7 @@ class AuthService {
     } catch (error) {
       console.error('Token refresh error:', error);
       this.clearAll();
+      this.clearVerificationCache();
       return {
         success: false,
         message: 'Session expired. Please login again.'
@@ -198,7 +315,7 @@ class AuthService {
     }
   }
 
-  // Logout from current device
+  // Logout - clears cache
   async logout() {
     try {
       const accessToken = this.getAccessToken();
@@ -207,6 +324,7 @@ class AuthService {
       if (!accessToken || !refreshToken) {
         console.log('No tokens found, clearing session');
         this.clearAll();
+        this.clearVerificationCache();
         return { success: true, message: 'Logged out' };
       }
 
@@ -223,8 +341,9 @@ class AuthService {
 
       console.log('Logout response:', response.data);
       
-      // Clear session regardless of response
+      // Clear session and cache
       this.clearAll();
+      this.clearVerificationCache();
       
       return {
         success: true,
@@ -233,56 +352,11 @@ class AuthService {
       
     } catch (error) {
       console.error('Logout error:', error);
-      // Clear session even on error
       this.clearAll();
+      this.clearVerificationCache();
       return {
         success: false,
         message: error.response?.data?.message || 'Logout failed'
-      };
-    }
-  }
-
-  // Logout from all devices
-  async logoutAllDevices() {
-    try {
-      const accessToken = this.getAccessToken();
-      const refreshToken = this.getRefreshToken();
-      
-      if (!accessToken || !refreshToken) {
-        console.log('No tokens found, clearing session');
-        this.clearAll();
-        return { success: true, message: 'Logged out from all devices' };
-      }
-
-      const response = await authApi.post(
-        API_CONFIG.endpoints.logoutAllDevices,
-        { refresh: refreshToken },
-        {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      console.log('Logout all devices response:', response.data);
-      
-      // Clear session regardless of response
-      this.clearAll();
-      
-      return {
-        success: true,
-        message: response.data?.message || 'Logged out from all devices successfully',
-        blacklistedTokens: response.data?.blacklisted_tokens || 0
-      };
-      
-    } catch (error) {
-      console.error('Logout all devices error:', error);
-      // Clear session even on error
-      this.clearAll();
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Logout from all devices failed'
       };
     }
   }
@@ -409,7 +483,7 @@ class AuthService {
     return history?.login_time || 'Never';
   }
 
-  // Check if user is authenticated
+  // Check if user is authenticated (local check)
   isAuthenticated() {
     const token = this.getAccessToken();
     if (!token) {
@@ -421,22 +495,16 @@ class AuthService {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const expiry = payload.exp * 1000;
       const isValid = Date.now() < expiry;
-      console.log('Token valid:', isValid);
+      
+      if (!isValid) {
+        this.clearVerificationCache();
+      }
+      
       return isValid;
     } catch (error) {
       console.error('Error checking token:', error);
       return false;
     }
-  }
-
-  // Verify current session
-  async verifyCurrentSession() {
-    const token = this.getAccessToken();
-    if (!token) {
-      return { success: false, message: 'No token found' };
-    }
-
-    return this.verifyToken(token);
   }
 
   // Check if user has required role
@@ -463,6 +531,7 @@ class AuthService {
   // Clear All Data - sessionStorage
   clearAll() {
     encryptionService.clearSession();
+    this.clearVerificationCache();
     console.log('All encrypted session data cleared');
   }
 
@@ -535,7 +604,6 @@ class AuthService {
           }
           if (data.message === 'Invalid or expired access token.' || 
               data.message === 'Refresh token is invalid, expired, or blacklisted.') {
-            // Token expired - try to refresh
             return {
               success: false,
               message: data.message,

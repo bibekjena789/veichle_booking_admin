@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../css/vehicle/VehicleModal.css';
-
+import { FaSpinner , FaPlus } from "react-icons/fa";
 const VehicleModal = ({
   isOpen,
   onClose,
