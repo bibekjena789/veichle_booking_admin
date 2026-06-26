@@ -215,7 +215,6 @@ const Login = () => {
             <div className="login-content">
               <div className="login-header">
                 <div className="logo">
-                  <span className="logo-icon">✈️</span>
                   <span className="logo-text">PixiYatra</span>
                 </div>
                 
@@ -435,13 +434,7 @@ const Login = () => {
               <div className="features-footer">
                 <div className="testimonial">
                   <p>"PixiYatra has transformed how we manage our travel business. Highly recommended!"</p>
-                  <div className="testimonial-author">
-                    <img src="https://ui-avatars.com/api/?name=Sarah+Johnson&size=40&background=667eea&color=fff" alt="Sarah Johnson" />
-                    <div>
-                      <strong>Sarah Johnson</strong>
-                      <span>Travel Agency Owner</span>
-                    </div>
-                  </div>
+                  
                 </div>
               </div>
             </div>
