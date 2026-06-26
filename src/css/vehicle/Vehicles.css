@@ -311,3 +311,210 @@ tbody tr:hover td {
     align-items: flex-start;
   }
 }
+/* Add these styles to your Vehicles.css */
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.loading-container .spinner {
+  font-size: 40px;
+  color: #667eea;
+  animation: spin 0.8s linear infinite;
+}
+
+.loading-container p {
+  margin-top: 16px;
+  color: #718096;
+}
+
+/* Error State */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+}
+
+.error-container .error-icon {
+  font-size: 48px;
+  color: #e53e3e;
+  margin-bottom: 16px;
+}
+
+.error-container h3 {
+  color: #2d3748;
+  margin-bottom: 8px;
+}
+
+.error-container p {
+  color: #718096;
+  margin-bottom: 20px;
+}
+
+.retry-btn {
+  padding: 10px 24px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.retry-btn:hover {
+  background: #5a67d8;
+  transform: translateY(-2px);
+}
+
+/* Search Box */
+.search-box {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0 12px;
+  transition: all 0.3s ease;
+}
+
+.search-box:focus-within {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.search-box .search-icon {
+  color: #a0aec0;
+  font-size: 16px;
+}
+
+.search-box input {
+  border: none;
+  outline: none;
+  padding: 8px 12px;
+  font-size: 14px;
+  min-width: 200px;
+  background: transparent;
+}
+
+/* Action Icons */
+.action-icon {
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.action-icon.view {
+  color: #3182ce;
+}
+
+.action-icon.view:hover {
+  background: #ebf4ff;
+}
+
+.action-icon.edit {
+  color: #38a169;
+}
+
+.action-icon.edit:hover {
+  background: #f0fff4;
+}
+
+.action-icon.delete {
+  color: #e53e3e;
+}
+
+.action-icon.delete:hover {
+  background: #fff5f5;
+}
+
+.action-icon.more {
+  color: #718096;
+}
+
+.action-icon.more:hover {
+  background: #f7fafc;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px 0;
+  border-top: 1px solid #e2e8f0;
+}
+
+.page-btn {
+  padding: 6px 16px;
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  color: #4a5568;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: #edf2f7;
+  border-color: #cbd5e0;
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-info {
+  font-size: 14px;
+  color: #4a5568;
+}
+
+.total-records {
+  font-size: 12px;
+  color: #a0aec0;
+  margin-left: 8px;
+}
+
+/* No Data */
+.no-data {
+  text-align: center;
+  padding: 40px !important;
+}
+
+.no-data p {
+  color: #a0aec0;
+  font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .search-box input {
+    min-width: 120px;
+  }
+  
+  .pagination {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .page-info {
+    font-size: 13px;
+    text-align: center;
+    width: 100%;
+  }
+}

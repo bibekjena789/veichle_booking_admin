@@ -126,9 +126,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     <aside className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
       <div className="sidebar-header">
         <div className="sidebar-logo">
-          <button className="sidebar-toggle" onClick={toggleSidebar} aria-label="Toggle sidebar">
-            {isOpen ? <FaChevronLeft /> : <FaChevronRight />}
-          </button>
           <img 
             src="/pixiyatra.png" 
             alt="PixiYatra Logo" 
@@ -138,6 +135,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             }}
           />
           {isOpen && <span className="sidebar-logo-text">Pixiyatra</span>}
+          <button className="sidebar-toggle" onClick={toggleSidebar} aria-label="Toggle sidebar">
+            {isOpen ? <FaChevronLeft /> : <FaChevronRight />}
+          </button>
         </div>
         {isOpen && <p className="sidebar-tagline">Explore the world</p>}
       </div>
