@@ -806,3 +806,27 @@
   display: none;
 }
 
+/* Add these styles to your Login.css */
+
+/* FCM Status */
+.fcm-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  margin: 4px 0 8px 0;
+  background: #ebf8ff;
+  color: #2a4365;
+}
+
+.fcm-icon {
+  font-size: 14px;
+}
+
+.fcm-text {
+  font-size: 12px;
+}
+

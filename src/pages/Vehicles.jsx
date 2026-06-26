@@ -11,9 +11,11 @@ import {
   FaUserFriends,
   FaPlus,
   FaSearch,
-  FaFilter,
   FaSpinner,
   FaExclamationTriangle,
+  FaCalendarAlt,
+  FaTag,
+  FaBuilding,
 } from "react-icons/fa";
 import '../css/vehicle/Vehicles.css';
 import vehicleService from '../api/vehicles';
@@ -46,7 +48,7 @@ function Vehicles() {
   const [filters, setFilters] = useState({
     search: '',
     status: 'all',
-    type: 'all',
+    company: '',
     minPrice: '',
     maxPrice: '',
     minSeat: '',
@@ -57,6 +59,7 @@ function Vehicles() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [modalLoading, setModalLoading] = useState(false);
   
@@ -78,13 +81,14 @@ function Vehicles() {
       
       // Add filters
       if (filters.search) params.search = filters.search;
+      if (filters.company) params.company = filters.company;
       if (filters.status !== 'all') {
-        params.isActive = filters.status === 'active';
+        params.is_active = filters.status === 'active';
       }
-      if (filters.minPrice) params.minPrice = parseFloat(filters.minPrice);
-      if (filters.maxPrice) params.maxPrice = parseFloat(filters.maxPrice);
-      if (filters.minSeat) params.minSeat = parseInt(filters.minSeat);
-      if (filters.maxSeat) params.maxSeat = parseInt(filters.maxSeat);
+      if (filters.minPrice) params.min_price = parseFloat(filters.minPrice);
+      if (filters.maxPrice) params.max_price = parseFloat(filters.maxPrice);
+      if (filters.minSeat) params.min_seat = parseInt(filters.minSeat);
+      if (filters.maxSeat) params.max_seat = parseInt(filters.maxSeat);
       
       const result = await vehicleService.getVehicles(params);
       
@@ -243,14 +247,36 @@ function Vehicles() {
     setShowDeleteModal(true);
   };
 
+  // Open view modal
+  const openViewModal = (vehicle) => {
+    setSelectedVehicle(vehicle);
+    setShowViewModal(true);
+  };
+
   // Get status badge
-  const getStatusBadge = (status) => {
-    const statusMap = {
-      'Active': 'active',
-      'Under Maintenance': 'maintenance',
-      'Inactive': 'inactive'
-    };
-    return statusMap[status] || 'active';
+  const getStatusBadge = (isActive) => {
+    return isActive ? 'active' : 'inactive';
+  };
+
+  // Format date
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch {
+      return 'N/A';
+    }
+  };
+
+  // Get amenity names
+  const getAmenityNames = (amenities) => {
+    if (!amenities || amenities.length === 0) return 'None';
+    return amenities.map(a => a.amenity).join(', ');
   };
 
   // Render loading state
@@ -271,7 +297,7 @@ function Vehicles() {
         <h3>Error Loading Vehicles</h3>
         <p>{error}</p>
         <button onClick={() => fetchVehicles()} className="retry-btn">
-           Retry
+          Retry
         </button>
       </div>
     );
@@ -350,12 +376,12 @@ function Vehicles() {
             <thead>
               <tr>
                 <th>Vehicle</th>
-                <th>Type</th>
+                <th>Company</th>
                 <th>Plate Number</th>
-                <th>Capacity</th>
-                <th>Year</th>
+                <th>Price/Km</th>
+                <th>Seats</th>
                 <th>Status</th>
-                <th>Last Service</th>
+                <th>Amenities</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -386,30 +412,70 @@ function Vehicles() {
                         />
                         <div>
                           <h4>{vehicle.veichle_name}</h4>
-                          <span>{vehicle.veichle_description || `${vehicle.total_number_of_sheat} Seater`}</span>
+                          <span className="vehicle-desc">
+                            {vehicle.veichle_description || `${vehicle.total_number_of_sheat} Seater`}
+                          </span>
+                          <span className="vehicle-id">
+                            ID: {vehicle.id?.substring(0, 8) || 'N/A'}
+                          </span>
                         </div>
                       </div>
                     </td>
                     <td>
-                      <span className="type-badge1">
-                        {vehicle.vehicle_type || 'N/A'}
-                      </span>
+                      <div className="company-info">
+                        <FaBuilding className="company-icon" />
+                        <span>{vehicle.compeny_name || 'N/A'}</span>
+                      </div>
                     </td>
-                    <td>{vehicle.veichle_number}</td>
                     <td>
-                      <FaUserFriends /> {vehicle.total_number_of_sheat}
+                      <span className="plate-number">{vehicle.veichle_number || 'N/A'}</span>
                     </td>
-                    <td>{vehicle.model_year || 'N/A'}</td>
                     <td>
-                      <span className={`status ${getStatusBadge(vehicle.is_active ? 'Active' : 'Inactive')}`}>
+                      <div className="price-info">
+                        <FaTag className="price-icon" />
+                        <span>₹{vehicle.price_per_km || 0}/km</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="seat-info">
+                        <FaUserFriends className="seat-icon" />
+                        <span>{vehicle.total_number_of_sheat || 0}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span className={`status ${getStatusBadge(vehicle.is_active)}`}>
                         {vehicle.is_active ? 'Active' : 'Inactive'}
                       </span>
+                      <span className="status-date">
+                        <FaCalendarAlt className="date-icon" />
+                        {formatDate(vehicle.updated_at)}
+                      </span>
                     </td>
-                    <td>{vehicle.last_service_date || 'N/A'}</td>
+                    <td>
+                      <div className="amenities-list">
+                        {vehicle.amenities && vehicle.amenities.length > 0 ? (
+                          <>
+                            {vehicle.amenities.slice(0, 2).map((amenity, idx) => (
+                              <span key={idx} className="amenity-tag">
+                                {amenity.amenity}
+                              </span>
+                            ))}
+                            {vehicle.amenities.length > 2 && (
+                              <span className="amenity-count">
+                                +{vehicle.amenities.length - 2}
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          <span className="no-amenities">None</span>
+                        )}
+                      </div>
+                    </td>
                     <td>
                       <div className="actions1">
                         <FaEye 
                           className="action-icon view" 
+                          onClick={() => openViewModal(vehicle)}
                           title="View Details"
                         />
                         <FaEdit 
@@ -494,6 +560,101 @@ function Vehicles() {
         loading={modalLoading}
         vehicleName={selectedVehicle?.veichle_name}
       />
+
+      {/* View Vehicle Modal */}
+{/* View Vehicle Modal */}
+{showViewModal && selectedVehicle && (
+  <div className="modal-overlay" onClick={() => setShowViewModal(false)}>
+    <div className="modal-content view-modal" onClick={(e) => e.stopPropagation()}>
+      {/* Sticky Header - Always visible */}
+      <div className="modal-sticky-header">
+        <div className="modal-header-top">
+          <h2>Vehicle Details</h2>
+          <button className="modal-close" onClick={() => setShowViewModal(false)}>×</button>
+        </div>
+        
+        {/* Vehicle Main Info - Stays on top */}
+        <div className="vehicle-main-info">
+          <div className="vehicle-avatar">
+            <img
+              src={
+                selectedVehicle.images && selectedVehicle.images.length > 0
+                  ? selectedVehicle.images[0].image
+                  : `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedVehicle.veichle_name)}&size=80&background=0ea5a4&color=fff&bold=true`
+              }
+              alt={selectedVehicle.veichle_name}
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedVehicle.veichle_name)}&size=80&background=0ea5a4&color=fff&bold=true`;
+              }}
+            />
+            <div className="vehicle-name-info">
+              <h3>{selectedVehicle.veichle_name}</h3>
+              <p className="vehicle-company">{selectedVehicle.compeny_name}</p>
+              <p className="vehicle-plate">{selectedVehicle.veichle_number}</p>
+            </div>
+          </div>
+          <div className="vehicle-status-badge">
+            <span className={`status-badge ${selectedVehicle.is_active ? 'active' : 'inactive'}`}>
+              <span className="dot"></span>
+              {selectedVehicle.is_active ? 'Active' : 'Inactive'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Scrollable Body - Only this part scrolls */}
+      <div className="modal-scrollable-body">
+        <div className="view-vehicle-details">
+          {/* Details Grid */}
+          <div className="details-grid">
+            <div className="detail-item">
+              <span className="detail-label">Price per KM</span>
+              <span className="detail-value">₹{selectedVehicle.price_per_km || 0}</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Seats</span>
+              <span className="detail-value">{selectedVehicle.total_number_of_sheat || 0}</span>
+            </div>
+            <div className="detail-item full-width">
+              <span className="detail-label">Description</span>
+              <span className="detail-value">{selectedVehicle.veichle_description || 'No description'}</span>
+            </div>
+            <div className="detail-item full-width">
+              <span className="detail-label">Amenities</span>
+              <div className="detail-amenities">
+                {selectedVehicle.amenities && selectedVehicle.amenities.length > 0 ? (
+                  selectedVehicle.amenities.map((amenity, idx) => (
+                    <span key={idx} className="amenity-tag">{amenity.amenity}</span>
+                  ))
+                ) : (
+                  <span className="no-amenities">No amenities</span>
+                )}
+              </div>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Added By</span>
+              <span className="detail-value">{selectedVehicle.added_by || 'N/A'}</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Created At</span>
+              <span className="detail-value">{formatDate(selectedVehicle.created_at)}</span>
+            </div>
+          </div>
+
+          
+        </div>
+      </div>
+
+      {/* Footer - Always visible */}
+      <div className="modal-footer">
+        <button className="btn-close" onClick={() => setShowViewModal(false)}>
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

@@ -35,16 +35,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { icon: FaUser, label: 'Profile', path: '/profile' },
   ];
 
-  // Prefetch page on hover (with error handling)
-  const prefetchPage = (path) => {
-    try {
-      const pageName = path.replace('/', '');
-      const capitalizedPage = pageName.charAt(0).toUpperCase() + pageName.slice(1);
-      import(`../pages/${capitalizedPage}`).catch(() => {});
-    } catch (e) {
-      // Silently fail
-    }
-  };
+  // ❌ REMOVED: prefetchPage function - causes Vite warning
+  // React Router's lazy loading handles code splitting automatically
 
   // Handle logout from current device
   const handleLogoutCurrentDevice = async () => {
@@ -53,14 +45,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     try {
       const result = await authService.logout();
       if (result.success) {
-        // Clear current device session data
         encryptionService.clearSession();
-        // Show success message
         console.log('Logged out from current device successfully');
         navigate('/login');
       } else {
         console.error('Logout failed:', result.message);
-        // Still clear session and redirect
         encryptionService.clearSession();
         navigate('/login');
       }
@@ -85,23 +74,18 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       console.log('Logout all devices response:', result);
       
       if (result.success) {
-        // Clear current device session data
         encryptionService.clearSession();
         
-        // Show success message with number of blacklisted tokens
         const message = result.blacklistedTokens > 0 
           ? `Logged out from all devices successfully. ${result.blacklistedTokens} sessions were terminated.`
           : 'Logged out from all devices successfully.';
         
         console.log(message);
-        
-        // You can show a toast notification here if you have one
         alert(message);
         
         navigate('/login');
       } else {
         console.error('Logout all devices failed:', result.message);
-        // Still clear session and redirect
         encryptionService.clearSession();
         navigate('/login');
       }
@@ -153,7 +137,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                   className={({ isActive }) => 
                     `sidebar-link ${isActive ? 'active' : ''}`
                   }
-                  onMouseEnter={() => prefetchPage(item.path)}
+                  // ❌ REMOVED: onMouseEnter={() => prefetchPage(item.path)}
                   onClick={() => {
                     if (window.innerWidth <= 768) {
                       toggleSidebar();
@@ -237,7 +221,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                   <span className="option-title">Logout All Devices</span>
                   <span className="option-subtitle">Logout from all active sessions</span>
                 </div>
-                {/* <span className="option-badge">Recommended</span> */}
               </button>
             </div>
           )}

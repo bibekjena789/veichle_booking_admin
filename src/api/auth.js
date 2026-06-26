@@ -1,6 +1,7 @@
 import axios from 'axios';
 import API_CONFIG from './config';
 import encryptionService from '../utils/encryption';
+import { requestFCMToken, isFCMAvailable } from '../firebase/firebase';
 
 // Create axios instance
 const authApi = axios.create({
@@ -13,183 +14,71 @@ const authApi = axios.create({
 
 class AuthService {
   constructor() {
-    // Verification cache
+    // Singleton instance check
+    if (AuthService._instance) {
+      return AuthService._instance;
+    }
+    AuthService._instance = this;
+
+    // Verification cache with deduplication
     this._verificationCache = {
       timestamp: null,
       result: null,
       token: null,
       pending: false,
-      pendingPromise: null
+      pendingPromise: null,
+      inProgress: false
     };
     
-    // Cache duration in milliseconds (30 seconds)
     this._cacheDuration = 30000;
+    this._lastVerifyTime = 0;
+    this._isVerifying = false;
+    this._verifyPromise = null;
     
-    // Debounce timer
-    this._debounceTimer = null;
-    this._lastVerifyTime = 0;
   }
 
   /**
-   * Verify Token with deduplication - prevents multiple simultaneous calls
+   * ============================================
+   * SINGLETON INSTANCE
+   * ============================================
    */
-  async verifyToken(token) {
-    try {
-      // If no token, return early
-      if (!token) {
-        return { success: false, message: 'No token provided' };
-      }
-
-      // Check if there's already a pending verification for this token
-      if (this._verificationCache.pending && 
-          this._verificationCache.token === token) {
-        console.log('⏳ Waiting for pending verification...');
-        return this._verificationCache.pendingPromise;
-      }
-
-      // Check cache for recent result
-      const now = Date.now();
-      const cachedToken = this._verificationCache.token;
-      const cachedTimestamp = this._verificationCache.timestamp;
-      const cachedResult = this._verificationCache.result;
-      
-      // If same token and cache is still fresh, return cached result
-      if (
-        cachedToken === token && 
-        cachedResult && 
-        cachedTimestamp && 
-        (now - cachedTimestamp) < this._cacheDuration
-      ) {
-        console.log('📦 Using cached token verification result');
-        return cachedResult;
-      }
-
-      // Rate limiting - prevent too many calls
-      if (now - this._lastVerifyTime < 1000) {
-        console.log('⏱️ Rate limiting verification, using cached if available');
-        if (cachedResult) {
-          return cachedResult;
-        }
-      }
-
-      console.log('🔄 Making fresh token verification API call');
-
-      // Create a pending promise
-      this._verificationCache.pending = true;
-      this._verificationCache.token = token;
-      this._verificationCache.pendingPromise = this._performVerification(token);
-      
-      const result = await this._verificationCache.pendingPromise;
-      
-      // Clear pending state
-      this._verificationCache.pending = false;
-      this._verificationCache.pendingPromise = null;
-      
-      return result;
-      
-    } catch (error) {
-      console.error('❌ Token verify error:', error);
-      this._verificationCache.pending = false;
-      this._verificationCache.pendingPromise = null;
-      return {
-        success: false,
-        message: error.message || 'Token verification failed'
-      };
+  static getInstance() {
+    if (!AuthService._instance) {
+      AuthService._instance = new AuthService();
     }
+    return AuthService._instance;
   }
 
   /**
-   * Perform actual verification (internal method)
+   * ============================================
+   * LOGIN METHOD
+   * ============================================
    */
-  async _performVerification(token) {
-    try {
-      const response = await authApi.post(API_CONFIG.endpoints.verify, {
-        token: token
-      });
 
-      console.log('📡 Token verify response received');
-
-      let result;
-      if (response.status === 200 && response.data.status === true) {
-        result = {
-          success: true,
-          data: response.data.data,
-          message: response.data.message || 'Token is valid'
-        };
-      } else {
-        result = {
-          success: false,
-          message: response.data.message || 'Invalid token'
-        };
-      }
-
-      // Update cache
-      this._verificationCache = {
-        ...this._verificationCache,
-        timestamp: Date.now(),
-        result: result,
-        token: token
-      };
-      
-      this._lastVerifyTime = Date.now();
-
-      return result;
-    } catch (error) {
-      console.error('❌ Verification API error:', error);
-      const result = {
-        success: false,
-        message: error.response?.data?.message || error.message || 'Verification failed'
-      };
-      
-      // Cache error result for a shorter time (5 seconds)
-      this._verificationCache = {
-        ...this._verificationCache,
-        timestamp: Date.now(),
-        result: result,
-        token: token
-      };
-      
-      return result;
-    }
-  }
-
-  /**
-   * Verify current session with deduplication
-   */
-  async verifyCurrentSession() {
-    const token = this.getAccessToken();
-    if (!token) {
-      return { success: false, message: 'No token found' };
-    }
-    return this.verifyToken(token);
-  }
-
-  /**
-   * Clear verification cache
-   */
-  clearVerificationCache() {
-    this._verificationCache = {
-      timestamp: null,
-      result: null,
-      token: null,
-      pending: false,
-      pendingPromise: null
-    };
-    this._lastVerifyTime = 0;
-    console.log('🧹 Verification cache cleared');
-  }
-
-  // ... rest of the methods remain the same ...
-  
-  // Login method
   async login(identifier, password) {
     try {
       console.log('Attempting login with:', { identifier, password: '***' });
+      
+      let fcmToken = null;
+      const enableFCM = import.meta.env.VITE_ENABLE_FCM !== 'false';
+      
+      if (enableFCM) {
+        try {
+          fcmToken = await this.getFCMToken();
+        } catch (error) {
+          console.log('ℹ️ FCM token not available, continuing without it');
+        }
+      }
       
       const payload = { 
         identifier: identifier,
         password: password 
       };
+      
+      if (fcmToken) {
+        payload.fcm_token = fcmToken;
+        console.log('📱 FCM token added to login payload');
+      }
       
       const response = await authApi.post(API_CONFIG.endpoints.login, payload);
       
@@ -207,13 +96,17 @@ class AuthService {
           const userData = data.data;
           
           if (tokens.access && tokens.access !== 'undefined' && tokens.access !== 'null') {
-            // Store encrypted data in sessionStorage
             this.storeEncryptedSessionData(tokens, userData, data);
             
             // Clear verification cache on new login
             this.clearVerificationCache();
             
-            console.log('Login successful!');
+            if (fcmToken) {
+              localStorage.setItem('fcm_token', fcmToken);
+              console.log('✅ FCM token stored locally');
+            }
+            
+            console.log('✅ Login successful!');
             
             return {
               success: true,
@@ -247,7 +140,215 @@ class AuthService {
     }
   }
 
-  // Refresh Token - clears cache on refresh
+  /**
+   * ============================================
+   * TOKEN VERIFICATION - WITH DEDUPLICATION
+   * ============================================
+   */
+
+  async verifyToken(token) {
+    // If no token, return early
+    if (!token) {
+      return { success: false, message: 'No token provided' };
+    }
+
+    // If verification is already in progress, return the existing promise
+    if (this._isVerifying) {
+      return this._verifyPromise;
+    }
+
+    // Check cache first
+    const cachedResult = this._getCachedResult(token);
+    if (cachedResult) {
+      return cachedResult;
+    }
+
+    // Start verification
+    this._isVerifying = true;
+    this._verifyPromise = this._performVerificationWithLock(token);
+    
+    try {
+      const result = await this._verifyPromise;
+      return result;
+    } finally {
+      this._isVerifying = false;
+      this._verifyPromise = null;
+    }
+  }
+
+  /**
+   * Get cached result if valid
+   */
+  _getCachedResult(token) {
+    const now = Date.now();
+    const cached = this._verificationCache;
+    
+    if (
+      cached.token === token &&
+      cached.result &&
+      cached.timestamp &&
+      (now - cached.timestamp) < this._cacheDuration
+    ) {
+      return cached.result;
+    }
+
+    // Rate limiting
+    if (cached.result && (now - this._lastVerifyTime) < 1000) {
+      console.log('⏱️ Rate limiting - using cached result');
+      return cached.result;
+    }
+
+    return null;
+  }
+
+  /**
+   * Perform verification with lock
+   */
+  async _performVerificationWithLock(token) {
+    try {
+      // Double-check cache after acquiring lock
+      const cachedResult = this._getCachedResult(token);
+      if (cachedResult) {
+        return cachedResult;
+      }
+
+      
+      const response = await authApi.post(API_CONFIG.endpoints.verify, {
+        token: token
+      });
+
+
+      let result;
+      if (response.status === 200 && response.data.status === true) {
+        result = {
+          success: true,
+          data: response.data.data,
+          message: response.data.message || 'Token is valid'
+        };
+      } else {
+        result = {
+          success: false,
+          message: response.data.message || 'Invalid token'
+        };
+      }
+
+      // Update cache
+      this._verificationCache = {
+        timestamp: Date.now(),
+        result: result,
+        token: token,
+        pending: false,
+        pendingPromise: null,
+        inProgress: false
+      };
+      
+      this._lastVerifyTime = Date.now();
+
+      return result;
+      
+    } catch (error) {
+      console.error('❌ Verification API error:', error);
+      const result = {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Verification failed'
+      };
+      
+      // Cache error result for shorter time (5 seconds)
+      this._verificationCache = {
+        timestamp: Date.now(),
+        result: result,
+        token: token,
+        pending: false,
+        pendingPromise: null,
+        inProgress: false
+      };
+      
+      return result;
+    }
+  }
+
+  /**
+   * Verify current session - with deduplication
+   */
+  async verifyCurrentSession() {
+    const token = this.getAccessToken();
+    if (!token) {
+      return { success: false, message: 'No token found' };
+    }
+    return this.verifyToken(token);
+  }
+
+  /**
+   * Clear verification cache
+   */
+  clearVerificationCache() {
+    this._verificationCache = {
+      timestamp: null,
+      result: null,
+      token: null,
+      pending: false,
+      pendingPromise: null,
+      inProgress: false
+    };
+    this._lastVerifyTime = 0;
+    this._isVerifying = false;
+    this._verifyPromise = null;
+  }
+
+  /**
+   * ============================================
+   * FCM TOKEN MANAGEMENT
+   * ============================================
+   */
+
+  async getFCMToken() {
+    try {
+      const enableFCM = import.meta.env.VITE_ENABLE_FCM !== 'false';
+      if (!enableFCM) {
+        console.log('ℹ️ FCM is disabled in environment');
+        return null;
+      }
+
+      let fcmToken = localStorage.getItem('fcm_token');
+      
+      if (fcmToken) {
+        console.log('📱 Using existing FCM token from localStorage');
+        return fcmToken;
+      }
+
+      if (!isFCMAvailable()) {
+        console.warn('⚠️ FCM not available, skipping token request');
+        return null;
+      }
+
+      console.log('📱 Requesting new FCM token...');
+      fcmToken = await requestFCMToken();
+      
+      if (fcmToken) {
+        localStorage.setItem('fcm_token', fcmToken);
+        console.log('✅ FCM token stored locally');
+        return fcmToken;
+      } else {
+        console.log('ℹ️ Failed to get FCM token');
+        return null;
+      }
+      
+    } catch (error) {
+      console.error('❌ Error getting FCM token:', error);
+      return null;
+    }
+  }
+
+  clearFCMToken() {
+    localStorage.removeItem('fcm_token');
+  }
+
+  /**
+   * ============================================
+   * TOKEN REFRESH
+   * ============================================
+   */
+
   async refreshToken() {
     try {
       const refreshToken = this.getRefreshToken();
@@ -276,14 +377,11 @@ class AuthService {
         };
 
         if (tokens.access && tokens.refresh) {
-          // Store new tokens
           encryptionService.setToken('access_token', tokens.access);
           encryptionService.setToken('refresh_token', tokens.refresh);
           
-          // Clear verification cache on token refresh
           this.clearVerificationCache();
           
-          // Update user data if provided
           if (response.data.data) {
             this.setUserData(response.data.data);
           }
@@ -315,45 +413,41 @@ class AuthService {
     }
   }
 
-  // Logout - clears cache
+  /**
+   * ============================================
+   * LOGOUT METHODS
+   * ============================================
+   */
+
   async logout() {
     try {
+      
       const accessToken = this.getAccessToken();
       const refreshToken = this.getRefreshToken();
       
-      if (!accessToken || !refreshToken) {
-        console.log('No tokens found, clearing session');
-        this.clearAll();
-        this.clearVerificationCache();
-        return { success: true, message: 'Logged out' };
-      }
-
-      const response = await authApi.post(
-        API_CONFIG.endpoints.logout,
-        { refresh: refreshToken },
-        {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-          }
+      if (accessToken && refreshToken) {
+        try {
+          await authApi.post(
+            API_CONFIG.endpoints.logout,
+            { refresh: refreshToken },
+            {
+              headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+        } catch (apiError) {
         }
-      );
-
-      console.log('Logout response:', response.data);
+      }
       
-      // Clear session and cache
-      this.clearAll();
-      this.clearVerificationCache();
+      await this.clearAllData();
       
-      return {
-        success: true,
-        message: response.data?.message || 'Logged out successfully'
-      };
+      return { success: true, message: 'Logged out successfully' };
       
     } catch (error) {
-      console.error('Logout error:', error);
-      this.clearAll();
-      this.clearVerificationCache();
+      console.error('❌ Logout error:', error);
+      await this.clearAllData();
       return {
         success: false,
         message: error.response?.data?.message || 'Logout failed'
@@ -361,10 +455,69 @@ class AuthService {
     }
   }
 
-  // Store encrypted session data
+  async logoutAllDevices() {
+    try {
+      
+      const accessToken = this.getAccessToken();
+      const refreshToken = this.getRefreshToken();
+      
+      let blacklistedTokens = 0;
+      
+      if (accessToken && refreshToken) {
+        try {
+          const response = await authApi.post(
+            API_CONFIG.endpoints.logoutAllDevices,
+            { refresh: refreshToken },
+            {
+              headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+          blacklistedTokens = response.data?.blacklisted_tokens || 0;
+        } catch (apiError) {
+        }
+      }
+      
+      await this.clearAllData();
+      
+      return {
+        success: true,
+        message: 'Logged out from all devices successfully',
+        blacklistedTokens: blacklistedTokens
+      };
+      
+    } catch (error) {
+      console.error('❌ Logout-all error:', error);
+      await this.clearAllData();
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Logout from all devices failed',
+        blacklistedTokens: 0
+      };
+    }
+  }
+
+  async clearAllData() {
+    try {
+      this.clearFCMToken();
+      this.clearAll();
+      this.clearVerificationCache();
+      sessionStorage.clear();
+    } catch (error) {
+      console.error('❌ Error clearing data:', error);
+    }
+  }
+
+  /**
+   * ============================================
+   * TOKEN STORAGE METHODS
+   * ============================================
+   */
+
   storeEncryptedSessionData(tokens, userData, responseData) {
     try {
-      // Store tokens encrypted
       if (tokens.access) {
         encryptionService.setToken('access_token', tokens.access);
       }
@@ -372,10 +525,8 @@ class AuthService {
         encryptionService.setToken('refresh_token', tokens.refresh);
       }
       
-      // Store user data encrypted
       this.setUserData(userData);
       
-      // Store login history
       const loginHistory = {
         timestamp: new Date().toISOString(),
         user_id: userData?.user_id || null,
@@ -395,8 +546,6 @@ class AuthService {
       };
       
       encryptionService.setLoginHistory(loginHistory);
-      
-      // Store login time
       encryptionService.setSessionItem('login_time', new Date().toISOString());
       
       console.log('All data encrypted and stored in sessionStorage');
@@ -405,7 +554,6 @@ class AuthService {
     }
   }
 
-  // Set user data
   setUserData(userData) {
     if (userData && typeof userData === 'object') {
       const userDataToStore = {
@@ -426,7 +574,6 @@ class AuthService {
       
       encryptionService.setUserData(userDataToStore);
       
-      // Store individual user fields for easy access
       if (userData.role) encryptionService.setSessionItem('user_role', userData.role);
       if (userData.name) encryptionService.setSessionItem('user_name', userData.name);
       if (userData.email) encryptionService.setSessionItem('user_email', userData.email);
@@ -436,7 +583,12 @@ class AuthService {
     }
   }
 
-  // Token Management - Encrypted sessionStorage
+  /**
+   * ============================================
+   * TOKEN GETTER METHODS
+   * ============================================
+   */
+
   getAccessToken() {
     return encryptionService.getToken('access_token');
   }
@@ -445,7 +597,6 @@ class AuthService {
     return encryptionService.getToken('refresh_token');
   }
 
-  // User Data - Encrypted sessionStorage
   getUserData() {
     return encryptionService.getUserData();
   }
@@ -483,7 +634,6 @@ class AuthService {
     return history?.login_time || 'Never';
   }
 
-  // Check if user is authenticated (local check)
   isAuthenticated() {
     const token = this.getAccessToken();
     if (!token) {
@@ -507,19 +657,22 @@ class AuthService {
     }
   }
 
-  // Check if user has required role
   hasRole(requiredRole) {
     const userRole = this.getUserRole();
     console.log('User role:', userRole, 'Required:', requiredRole);
     return userRole === requiredRole;
   }
 
-  // Check if user is Vehicle Booking Controller Admin
   isVehicleAdmin() {
     return this.hasRole('Veichle_Booking_Controller_Admin');
   }
 
-  // Get auth headers for API calls
+  clearAll() {
+    encryptionService.clearSession();
+    this.clearVerificationCache();
+    console.log('All encrypted session data cleared');
+  }
+
   getAuthHeaders() {
     const token = this.getAccessToken();
     return {
@@ -528,14 +681,39 @@ class AuthService {
     };
   }
 
-  // Clear All Data - sessionStorage
-  clearAll() {
-    encryptionService.clearSession();
-    this.clearVerificationCache();
-    console.log('All encrypted session data cleared');
+  async apiCall(method, endpoint, data = null) {
+    try {
+      const token = this.getAccessToken();
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const config = {
+        method,
+        url: endpoint,
+        headers,
+        data: data || undefined
+      };
+
+      const response = await authApi(config);
+      return response.data;
+    } catch (error) {
+      return this.handleError(error);
+    }
   }
 
-  // Handle API Errors
+  async getProfile() {
+    return this.apiCall('get', API_CONFIG.endpoints.profile);
+  }
+
+  async updateProfile(data) {
+    return this.apiCall('put', API_CONFIG.endpoints.profile, data);
+  }
+
   handleError(error) {
     if (error.code === 'ERR_NETWORK' || error.code === 'ECONNREFUSED' || error.message === 'Network Error') {
       return {
@@ -588,11 +766,14 @@ class AuthService {
             errorMsg = `Token: ${Array.isArray(data.token) ? data.token[0] : data.token}`;
           } else if (data.refresh) {
             errorMsg = `Refresh: ${Array.isArray(data.refresh) ? data.refresh[0] : data.refresh}`;
+          } else if (data.detail) {
+            errorMsg = data.detail;
           }
           return {
             success: false,
             message: errorMsg || 'Validation error. Please check your input.',
-            errors: data.message || data
+            errors: data.message || data,
+            details: data
           };
         case 401:
           if (data.message === 'Account locked. Try later.') {
@@ -607,43 +788,50 @@ class AuthService {
             return {
               success: false,
               message: data.message,
-              code: 'TOKEN_EXPIRED'
+              code: 'TOKEN_EXPIRED',
+              details: data
             };
           }
           return {
             success: false,
-            message: data.message || 'Invalid credentials. Please check your identifier and password.',
-            code: 'UNAUTHORIZED'
+            message: data.message || data.detail || 'Invalid credentials. Please check your identifier and password.',
+            code: 'UNAUTHORIZED',
+            details: data
           };
         case 403:
           return {
             success: false,
-            message: data.message || 'Access denied. You are not authorized.',
-            code: 'FORBIDDEN'
+            message: data.message || data.detail || 'Access denied. You are not authorized.',
+            code: 'FORBIDDEN',
+            details: data
           };
         case 404:
           return {
             success: false,
-            message: `API endpoint not found. Please check the URL.`,
-            code: 'NOT_FOUND'
+            message: data.detail || 'API endpoint not found. Please check the URL.',
+            code: 'NOT_FOUND',
+            details: data
           };
         case 429:
           return {
             success: false,
             message: 'Too many attempts. Please try again later.',
-            code: 'RATE_LIMIT'
+            code: 'RATE_LIMIT',
+            details: data
           };
         case 500:
           return {
             success: false,
-            message: data.message || 'Server error. Please try again later.',
-            code: 'SERVER_ERROR'
+            message: data.message || data.detail || 'Server error. Please try again later.',
+            code: 'SERVER_ERROR',
+            details: data
           };
         default:
           return {
             success: false,
-            message: data.message || `Error ${status}: ${error.message}`,
-            code: 'UNKNOWN'
+            message: data.message || data.detail || `Error ${status}: ${error.message}`,
+            code: 'UNKNOWN',
+            details: data
           };
       }
     } else if (error.request) {
@@ -660,45 +848,10 @@ class AuthService {
       };
     }
   }
-
-  // API call with token (manual)
-  async apiCall(method, endpoint, data = null) {
-    try {
-      const token = this.getAccessToken();
-      const headers = {
-        'Content-Type': 'application/json',
-      };
-      
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      const config = {
-        method,
-        url: endpoint,
-        headers,
-        data: data || undefined
-      };
-
-      const response = await authApi(config);
-      return response.data;
-    } catch (error) {
-      return this.handleError(error);
-    }
-  }
-
-  // Protected API calls
-  async getProfile() {
-    return this.apiCall('get', API_CONFIG.endpoints.profile);
-  }
-
-  async updateProfile(data) {
-    return this.apiCall('put', API_CONFIG.endpoints.profile, data);
-  }
 }
 
-// Create singleton instance
-const authService = new AuthService();
+// Export singleton instance
+const authService = AuthService.getInstance();
 
 export default authService;
 export { authApi };

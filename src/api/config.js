@@ -11,6 +11,10 @@ const API_CONFIG = {
     logoutAllDevices: '/V1/veichle_booking_controller/web/admin/staff/logout-from-all-device/',
     profile: '/V1/veichle_booking_controller/web/admin/staff/profile/',
     
+    // FCM endpoints
+    // registerFCM: '/V1/veichle_booking_controller/web/admin/staff/register-fcm-token/',
+    // unregisterFCM: '/V1/veichle_booking_controller/web/admin/staff/unregister-fcm-token/',
+    
     // Vehicle endpoints
     vehicles: '/V1/veichle_booking_controller/web/admin/staff/vehicle/',
     amenities: '/V1/veichle_booking_controller/web/admin/staff/vehicle/amenities/',

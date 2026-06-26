@@ -18,7 +18,7 @@ import {
 } from 'react-icons/fa';
 import authService from '../api/auth';
 import API_CONFIG from '../api/config';
-import encryptionService from '../utils/encryption';
+import { requestFCMToken } from '../firebase/firebase';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -60,17 +60,13 @@ const Login = () => {
   const [validationErrors, setValidationErrors] = useState({});
   const [apiStatus, setApiStatus] = useState('checking');
   const [loginAttempts, setLoginAttempts] = useState(0);
+  const [fcmStatus, setFcmStatus] = useState('Checking...');
   const navigate = useNavigate();
 
-  // Check API connection on mount
+  // Check API connection and FCM on mount
   useEffect(() => {
     checkApiConnection();
-    
-    // Check if already logged in
-    const token = authService.getAccessToken();
-    if (token && authService.isAuthenticated()) {
-      navigate('/dashboard');
-    }
+    checkFCMStatus();
   }, []);
 
   const checkApiConnection = async () => {
@@ -82,10 +78,30 @@ const Login = () => {
         }
       });
       setApiStatus('online');
-      console.log('API is online:', response.status);
     } catch (error) {
       setApiStatus('offline');
       console.error('API is offline:', error.message);
+    }
+  };
+
+  const checkFCMStatus = async () => {
+    try {
+      // Check if notification permission is granted
+      if ('Notification' in window) {
+        const permission = Notification.permission;
+        if (permission === 'granted') {
+          setFcmStatus('✅ FCM Ready');
+        } else if (permission === 'denied') {
+          setFcmStatus('❌ FCM Blocked');
+        } else {
+          setFcmStatus('⚠️ FCM Not Requested');
+        }
+      } else {
+        setFcmStatus('❌ FCM Not Supported');
+      }
+    } catch (error) {
+      console.error('FCM status check error:', error);
+      setFcmStatus('❌ FCM Error');
     }
   };
 
@@ -97,7 +113,6 @@ const Login = () => {
     setValidationErrors({});
     setLoading(true);
     
-    console.log('Login attempt started...');
 
     if (!identifier.trim()) {
       setError('Please enter your email or phone number');
@@ -132,6 +147,8 @@ const Login = () => {
           return;
         }
 
+        // FCM token is automatically registered during login
+        
         setLoading(false);
         navigate('/dashboard', { replace: true });
         
@@ -170,7 +187,6 @@ const Login = () => {
       setErrorType('unknown');
     } finally {
       setLoading(false);
-      console.log('Login process completed');
     }
   };
 
@@ -218,6 +234,12 @@ const Login = () => {
                       <FaExclamationTriangle /> API Offline
                     </>
                   )}
+                </div>
+
+                {/* FCM Status Indicator */}
+                <div className="fcm-status">
+                  <span className="fcm-icon">📱</span>
+                  <span className="fcm-text">{fcmStatus}</span>
                 </div>
 
                 <h1>Manage. Monitor. Grow Your Travel Business</h1>
@@ -414,7 +436,7 @@ const Login = () => {
                 <div className="testimonial">
                   <p>"PixiYatra has transformed how we manage our travel business. Highly recommended!"</p>
                   <div className="testimonial-author">
-                    <img src="/pixiyatra.png" alt="User" />
+                    <img src="https://ui-avatars.com/api/?name=Sarah+Johnson&size=40&background=667eea&color=fff" alt="Sarah Johnson" />
                     <div>
                       <strong>Sarah Johnson</strong>
                       <span>Travel Agency Owner</span>
