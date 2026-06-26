@@ -33,11 +33,11 @@
   flex-shrink: 0;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
-
+                            
 .sidebar-logo {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  justify-content:space-between;
+  gap: 15px;
 }
 
 .sidebar-toggle {
