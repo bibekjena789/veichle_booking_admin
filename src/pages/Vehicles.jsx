@@ -125,14 +125,28 @@ function Vehicles() {
 
           <div className="filters1">
              <button className="add-btn">+ Add Vehicle</button>
-            <select>
-              <option>All Status</option>
-            </select>
+{/* Status Filter */}
+<select className="filter-select">
+  <option value="all">All Status</option>
+  <option value="active">Active</option>
+  <option value="maintenance">Under Maintenance</option>
+  <option value="inactive">Inactive</option>
+</select>
 
-            <select>
-              <option>All Types</option>
-            </select>
+{/* Vehicle Type Filter */}
+<select className="filter-select">
+  <option value="all">All Types</option>
+  <option value="suv">SUV</option>
+  <option value="sedan">Sedan</option>
+  <option value="hatchback">Hatchback</option>
+  <option value="van">Van</option>
+  <option value="luxury">Luxury</option>
+  <option value="electric">Electric</option>
+</select>
 
+<button className="filter-btn1">
+  Filter
+</button>
             <button className="filter-btn1">
               Filter
             </button>
