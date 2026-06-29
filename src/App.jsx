@@ -6,8 +6,8 @@ import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Lazy load pages
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const Vehicles = lazy(() => import('./pages/Vehicles'));
+const Dashboard = lazy(() => import('./pages/DashboardHome'));
+const Vehicles = lazy(() => import('./pages/VehiclesList'));
 const Bookings = lazy(() => import('./pages/Bookings'));
 const Reviews = lazy(() => import('./pages/Reviews'));
 const Offers = lazy(() => import('./pages/AddOffer'));

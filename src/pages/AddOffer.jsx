@@ -1,9 +1,10 @@
 import React from 'react'
+import Offers from '../components/dashboardcomponents/Offers';
 
-function AddOffer() {
+export default function AddOffer() {
   return (
-    <div>AddOffer</div>
+    <div>
+      <Offers />
+    </div>
   )
 }
-
-export default AddOffer

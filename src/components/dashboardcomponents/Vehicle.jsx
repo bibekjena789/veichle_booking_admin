@@ -17,10 +17,10 @@ import {
   FaTag,
   FaBuilding,
 } from "react-icons/fa";
-import '../css/vehicle/Vehicles.css';
-import vehicleService from '../api/vehicles';
-import VehicleModal from '../components/VehicleModal';
-import DeleteConfirmModal from '../components/DeleteConfirmModal';
+import '../../css/vehicle/Vehicles.css';
+import vehicleService from '../../api/vehicles';
+import VehicleModal from '..//VehicleModal';
+import DeleteConfirmModal from '../DeleteConfirmModal';
 
 function Vehicles() {
   // State

@@ -7,7 +7,7 @@ import {
   FaSearch,
 } from "react-icons/fa";
 
-import "../css/Dashboard.css";
+import "../../css/Dashboard.css";
 
 function Dashboard() {
   return (

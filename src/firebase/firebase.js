@@ -26,7 +26,6 @@ try {
   const missingFields = requiredFields.filter(field => !firebaseConfig[field]);
   
   if (missingFields.length > 0) {
-    console.warn('⚠️ Missing Firebase config fields:', missingFields);
   } else {
     app = initializeApp(firebaseConfig);
     
