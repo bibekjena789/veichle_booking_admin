@@ -417,9 +417,7 @@ function Vehicles() {
                           <span className="vehicle-desc">
                             {vehicle.veichle_description || `${vehicle.total_number_of_sheat} Seater`}
                           </span>
-                          <span className="vehicle-id">
-                            ID: {vehicle.id?.substring(0, 8) || 'N/A'}
-                          </span>
+                          
                         </div>
                       </div>
                     </td>
@@ -430,7 +428,10 @@ function Vehicles() {
                       </div>
                     </td>
                     <td>
-                      <span className="plate-number">{vehicle.veichle_number || 'N/A'}</span>
+                      <span className="plate-number">
+                        {/* {vehicle.veichle_number || 'N/A'} */}
+                        N/A
+                        </span>
                     </td>
                     <td>
                       <div className="price-info">
