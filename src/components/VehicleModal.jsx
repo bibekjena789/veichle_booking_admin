@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import '../css/vehicle/VehicleModal.css';
-import { FaSpinner , FaPlus } from "react-icons/fa";
+import { FaSpinner, FaPlus, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import vehicleService from '../api/vehicles';
+
 const VehicleModal = ({
   isOpen,
   onClose,
@@ -9,7 +11,9 @@ const VehicleModal = ({
   amenities = [],
   vehicle = null,
   title = 'Vehicle',
-  submitText = 'Submit'
+  submitText = 'Submit',
+  isViewMode = false,
+  isAdmin = false
 }) => {
   const [formData, setFormData] = useState({
     veichle_name: '',
@@ -27,6 +31,7 @@ const VehicleModal = ({
   const [previewImages, setPreviewImages] = useState([]);
   const [errors, setErrors] = useState({});
   const [deleteImageIds, setDeleteImageIds] = useState([]);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   useEffect(() => {
     if (vehicle) {
@@ -84,6 +89,45 @@ const VehicleModal = ({
     }
   };
 
+  const handleStatusChange = (value) => {
+    setFormData(prev => ({
+      ...prev,
+      is_active: value === 'active'
+    }));
+    if (errors.is_active) {
+      setErrors(prev => ({ ...prev, is_active: null }));
+    }
+  };
+
+  // Quick status toggle for view mode
+  const handleQuickStatusToggle = async () => {
+    if (!vehicle) return;
+    
+    setIsUpdatingStatus(true);
+    try {
+      const formData = new FormData();
+      formData.append('is_active', !formData.is_active ? 'true' : 'false');
+      
+      const result = await vehicleService.updateVehicle(vehicle.id, formData);
+      if (result.success) {
+        // Update the local state
+        setFormData(prev => ({
+          ...prev,
+          is_active: !prev.is_active
+        }));
+        // Refresh the vehicle data
+        if (onSubmit) {
+          // Call a refresh callback if provided
+          onSubmit({ is_active: !formData.is_active });
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling status:', error);
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
   const handleAmenityToggle = (amenityId) => {
     setSelectedAmenities(prev => {
       if (prev.includes(amenityId)) {
@@ -123,6 +167,8 @@ const VehicleModal = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isViewMode) return; // Don't submit in view mode
+    
     setErrors({});
 
     // Validation
@@ -149,6 +195,8 @@ const VehicleModal = ({
         selectedAmenities.forEach(id => {
           submitData.append('amenities', id);
         });
+      } else if (key === 'is_active') {
+        submitData.append(key, formData[key] ? 'true' : 'false');
       } else {
         submitData.append(key, formData[key]);
       }
@@ -170,165 +218,296 @@ const VehicleModal = ({
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <div className={`modal-content ${isViewMode ? 'view-mode' : ''}`} onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>{title}</h2>
+          <h2>{isViewMode ? 'Vehicle Details' : title}</h2>
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
+            {/* Status Banner - Always visible in View Mode */}
+            {isViewMode && (
+              <div className="status-banner">
+                <div className="status-banner-content">
+                  <div className="status-display">
+                    <span className="status-label">Current Status:</span>
+                    <span className={`status-value ${formData.is_active ? 'active' : 'inactive'}`}>
+                      {formData.is_active ? '🟢 Active' : '🔴 Inactive'}
+                    </span>
+                  </div>
+                  {/* Status toggle button - Always visible in view mode */}
+                  <button
+                    type="button"
+                    className={`status-toggle-btn ${formData.is_active ? 'active' : 'inactive'}`}
+                    onClick={handleQuickStatusToggle}
+                    disabled={isUpdatingStatus}
+                  >
+                    {isUpdatingStatus ? (
+                      <FaSpinner className="spinner-small" />
+                    ) : (
+                      <>
+                        {formData.is_active ? (
+                          <>
+                            <FaTimesCircle /> Mark as Inactive
+                          </>
+                        ) : (
+                          <>
+                            <FaCheckCircle /> Mark as Active
+                          </>
+                        )}
+                      </>
+                    )}
+                  </button>
+                </div>
+                <p className="status-hint">
+                  {formData.is_active 
+                    ? 'This vehicle is currently available for bookings' 
+                    : 'This vehicle is currently unavailable for bookings'}
+                </p>
+              </div>
+            )}
+
             <div className="form-grid">
               <div className="form-group">
-                <label>Vehicle Name *</label>
-                <input
-                  type="text"
-                  name="veichle_name"
-                  value={formData.veichle_name}
-                  onChange={handleChange}
-                  placeholder="Enter vehicle name"
-                  className={errors.veichle_name ? 'error' : ''}
-                />
+                <label>Vehicle Name {!isViewMode && '*'}</label>
+                {isViewMode ? (
+                  <p className="view-value">{formData.veichle_name || 'N/A'}</p>
+                ) : (
+                  <input
+                    type="text"
+                    name="veichle_name"
+                    value={formData.veichle_name}
+                    onChange={handleChange}
+                    placeholder="Enter vehicle name"
+                    className={errors.veichle_name ? 'error' : ''}
+                  />
+                )}
                 {errors.veichle_name && <span className="error-text">{errors.veichle_name}</span>}
               </div>
 
               <div className="form-group">
-                <label>Company Name *</label>
-                <input
-                  type="text"
-                  name="compeny_name"
-                  value={formData.compeny_name}
-                  onChange={handleChange}
-                  placeholder="Enter company name"
-                  className={errors.compeny_name ? 'error' : ''}
-                />
+                <label>Company Name {!isViewMode && '*'}</label>
+                {isViewMode ? (
+                  <p className="view-value">{formData.compeny_name || 'N/A'}</p>
+                ) : (
+                  <input
+                    type="text"
+                    name="compeny_name"
+                    value={formData.compeny_name}
+                    onChange={handleChange}
+                    placeholder="Enter company name"
+                    className={errors.compeny_name ? 'error' : ''}
+                  />
+                )}
                 {errors.compeny_name && <span className="error-text">{errors.compeny_name}</span>}
               </div>
 
               <div className="form-group">
-                <label>Vehicle Number *</label>
-                <input
-                  type="text"
-                  name="veichle_number"
-                  value={formData.veichle_number}
-                  onChange={handleChange}
-                  placeholder="e.g., KA01AB1234"
-                  className={errors.veichle_number ? 'error' : ''}
-                />
+                <label>Vehicle Number {!isViewMode && '*'}</label>
+                {isViewMode ? (
+                  <p className="view-value">{formData.veichle_number || 'N/A'}</p>
+                ) : (
+                  <input
+                    type="text"
+                    name="veichle_number"
+                    value={formData.veichle_number}
+                    onChange={handleChange}
+                    placeholder="e.g., KA01AB1234"
+                    className={errors.veichle_number ? 'error' : ''}
+                  />
+                )}
                 {errors.veichle_number && <span className="error-text">{errors.veichle_number}</span>}
               </div>
 
               <div className="form-group">
-                <label>Price per KM (₹) *</label>
-                <input
-                  type="number"
-                  name="price_per_km"
-                  value={formData.price_per_km}
-                  onChange={handleChange}
-                  placeholder="0.00"
-                  step="0.01"
-                  min="0"
-                  className={errors.price_per_km ? 'error' : ''}
-                />
+                <label>Price per KM (₹) {!isViewMode && '*'}</label>
+                {isViewMode ? (
+                  <p className="view-value">₹{formData.price_per_km || '0'}</p>
+                ) : (
+                  <input
+                    type="number"
+                    name="price_per_km"
+                    value={formData.price_per_km}
+                    onChange={handleChange}
+                    placeholder="0.00"
+                    step="0.01"
+                    min="0"
+                    className={errors.price_per_km ? 'error' : ''}
+                  />
+                )}
                 {errors.price_per_km && <span className="error-text">{errors.price_per_km}</span>}
               </div>
 
               <div className="form-group">
-                <label>Number of Seats *</label>
-                <input
-                  type="number"
-                  name="total_number_of_sheat"
-                  value={formData.total_number_of_sheat}
-                  onChange={handleChange}
-                  placeholder="4"
-                  min="1"
-                  className={errors.total_number_of_sheat ? 'error' : ''}
-                />
+                <label>Number of Seats {!isViewMode && '*'}</label>
+                {isViewMode ? (
+                  <p className="view-value">{formData.total_number_of_sheat || '0'}</p>
+                ) : (
+                  <input
+                    type="number"
+                    name="total_number_of_sheat"
+                    value={formData.total_number_of_sheat}
+                    onChange={handleChange}
+                    placeholder="4"
+                    min="1"
+                    className={errors.total_number_of_sheat ? 'error' : ''}
+                  />
+                )}
                 {errors.total_number_of_sheat && <span className="error-text">{errors.total_number_of_sheat}</span>}
               </div>
 
-              <div className="form-group">
+              {/* Status Field - Only for Admin in Edit Mode */}
+              {!isViewMode && isAdmin && (
+                <div className="form-group">
+                  <label>Status *</label>
+                  <div className="status-toggle-group">
+                    <button
+                      type="button"
+                      className={`status-toggle-btn active ${formData.is_active ? 'selected' : ''}`}
+                      onClick={() => handleStatusChange('active')}
+                    >
+                      <FaCheckCircle className="status-icon" />
+                      Active
+                    </button>
+                    <button
+                      type="button"
+                      className={`status-toggle-btn inactive ${!formData.is_active ? 'selected' : ''}`}
+                      onClick={() => handleStatusChange('inactive')}
+                    >
+                      <FaTimesCircle className="status-icon" />
+                      Inactive
+                    </button>
+                  </div>
+                  {errors.is_active && <span className="error-text">{errors.is_active}</span>}
+                  <small className="status-hint">
+                    <FaCheckCircle className="hint-icon" /> 
+                    {formData.is_active ? 'Vehicle is currently active and available' : 'Vehicle is currently inactive and unavailable'}
+                  </small>
+                </div>
+              )}
+
+              {/* Status Display for View Mode */}
+              {isViewMode && (
+                <div className="form-group">
+                  <label>Status</label>
+                  <p className={`view-value status-display-text ${formData.is_active ? 'active' : 'inactive'}`}>
+                    {formData.is_active ? '🟢 Active' : '🔴 Inactive'}
+                  </p>
+                </div>
+              )}
+
+              <div className="form-group full-width">
                 <label>Description</label>
-                <textarea
-                  name="veichle_description"
-                  value={formData.veichle_description}
-                  onChange={handleChange}
-                  placeholder="Vehicle description"
-                  rows="3"
-                />
+                {isViewMode ? (
+                  <p className="view-value description">{formData.veichle_description || 'No description provided'}</p>
+                ) : (
+                  <textarea
+                    name="veichle_description"
+                    value={formData.veichle_description}
+                    onChange={handleChange}
+                    placeholder="Vehicle description"
+                    rows="3"
+                  />
+                )}
               </div>
 
               <div className="form-group full-width">
-                <label>Amenities * (Minimum 2)</label>
-                <div className="amenities-grid">
-                  {amenities.map((amenity) => (
-                    <button
-                      key={amenity.id}
-                      type="button"
-                      className={`amenity-chip ${selectedAmenities.includes(amenity.id) ? 'selected' : ''}`}
-                      onClick={() => handleAmenityToggle(amenity.id)}
-                    >
-                      {selectedAmenities.includes(amenity.id) ? '✓' : ''} {amenity.amenity}
-                    </button>
-                  ))}
-                </div>
-                {errors.amenities && <span className="error-text">{errors.amenities}</span>}
+                <label>Amenities {!isViewMode && '* (Minimum 2)'}</label>
+                {isViewMode ? (
+                  <div className="view-amenities">
+                    {formData.amenities && formData.amenities.length > 0 ? (
+                      selectedAmenities.map((id) => {
+                        const amenity = amenities.find(a => a.id === id);
+                        return amenity ? (
+                          <span key={id} className="amenity-tag">{amenity.amenity}</span>
+                        ) : null;
+                      })
+                    ) : (
+                      <p className="view-value">No amenities</p>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <div className="amenities-grid">
+                      {amenities.map((amenity) => (
+                        <button
+                          key={amenity.id}
+                          type="button"
+                          className={`amenity-chip ${selectedAmenities.includes(amenity.id) ? 'selected' : ''}`}
+                          onClick={() => handleAmenityToggle(amenity.id)}
+                        >
+                          {selectedAmenities.includes(amenity.id) ? '✓' : ''} {amenity.amenity}
+                        </button>
+                      ))}
+                    </div>
+                    {errors.amenities && <span className="error-text">{errors.amenities}</span>}
+                  </>
+                )}
               </div>
 
               <div className="form-group full-width">
                 <label>Vehicle Images</label>
-                <div className="image-upload-area">
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="file-input"
-                  />
-                  <div className="upload-placeholder">
-                    <FaPlus />
-                    <p>Upload Images (Max 10, 3MB each)</p>
-                  </div>
-                </div>
-                {previewImages.length > 0 && (
-                  <div className="image-preview-grid">
-                    {previewImages.map((img, index) => (
-                      <div key={index} className="image-preview-item">
-                        <img src={img.url} alt={`Vehicle ${index + 1}`} />
-                        <button
-                          type="button"
-                          className="remove-image"
-                          onClick={() => removeImage(index)}
-                        >
-                          ×
-                        </button>
+                {isViewMode ? (
+                  <div className="view-images">
+                    {previewImages.length > 0 ? (
+                      <div className="image-preview-grid">
+                        {previewImages.map((img, index) => (
+                          <div key={index} className="image-preview-item">
+                            <img src={img.url} alt={`Vehicle ${index + 1}`} />
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    ) : (
+                      <p className="view-value">No images</p>
+                    )}
                   </div>
+                ) : (
+                  <>
+                    <div className="image-upload-area">
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="file-input"
+                      />
+                      <div className="upload-placeholder">
+                        <FaPlus />
+                        <p>Upload Images (Max 10, 3MB each)</p>
+                      </div>
+                    </div>
+                    {previewImages.length > 0 && (
+                      <div className="image-preview-grid">
+                        {previewImages.map((img, index) => (
+                          <div key={index} className="image-preview-item">
+                            <img src={img.url} alt={`Vehicle ${index + 1}`} />
+                            <button
+                              type="button"
+                              className="remove-image"
+                              onClick={() => removeImage(index)}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
                 )}
-              </div>
-
-              <div className="form-group">
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    name="is_active"
-                    checked={formData.is_active}
-                    onChange={handleChange}
-                  />
-                  Active Vehicle
-                </label>
               </div>
             </div>
           </div>
 
           <div className="modal-footer">
             <button type="button" className="btn-cancel" onClick={onClose}>
-              Cancel
+              {isViewMode ? 'Close' : 'Cancel'}
             </button>
-            <button type="submit" className="btn-submit" disabled={loading}>
-              {loading ? <FaSpinner className="spinner" /> : submitText}
-            </button>
+            {!isViewMode && (
+              <button type="submit" className="btn-submit" disabled={loading}>
+                {loading ? <FaSpinner className="spinner" /> : submitText}
+              </button>
+            )}
           </div>
         </form>
       </div>

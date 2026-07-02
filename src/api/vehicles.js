@@ -40,7 +40,9 @@ class VehicleService {
       // Filters
       if (params.search) queryParams.append('search', params.search);
       if (params.company) queryParams.append('company', params.company);
-      if (params.isActive !== undefined) queryParams.append('is_active', params.isActive);
+      if (params.is_active !== undefined && params.is_active !== '') {
+        queryParams.append('is_active', params.is_active);
+      }
       if (params.minPrice) queryParams.append('min_price', params.minPrice);
       if (params.maxPrice) queryParams.append('max_price', params.maxPrice);
       if (params.minSeat) queryParams.append('min_seat', params.minSeat);
@@ -163,6 +165,28 @@ class VehicleService {
     } catch (error) {
       return this.handleError(error);
     }
+  }
+
+  /**
+   * Get current user role
+   * @returns {string} User role
+   */
+  getUserRole() {
+    try {
+      const user = authService.getUser();
+      return user?.role || 'user';
+    } catch (error) {
+      return 'user';
+    }
+  }
+
+  /**
+   * Check if user is admin
+   * @returns {boolean} Is admin
+   */
+  isAdmin() {
+    const role = this.getUserRole();
+    return role === 'admin' || role === 'super_admin';
   }
 
   /**

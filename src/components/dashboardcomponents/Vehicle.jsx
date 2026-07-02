@@ -7,19 +7,19 @@ import {
   FaEye,
   FaEdit,
   FaTrash,
-  FaEllipsisV,
-  FaUserFriends,
   FaPlus,
   FaSearch,
   FaSpinner,
   FaExclamationTriangle,
-  FaCalendarAlt,
-  FaTag,
-  FaBuilding,
+  FaStar,
+  FaUserFriends,
+  FaFilter,
+  FaToggleOn,
+  FaToggleOff,
 } from "react-icons/fa";
 import '../../css/vehicle/Vehicles.css';
 import vehicleService from '../../api/vehicles';
-import VehicleModal from '..//VehicleModal';
+import VehicleModal from '../VehicleModal';
 import DeleteConfirmModal from '../DeleteConfirmModal';
 
 function Vehicles() {
@@ -66,6 +66,18 @@ function Vehicles() {
   // Amenities
   const [amenities, setAmenities] = useState([]);
   const [loadingAmenities, setLoadingAmenities] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Admin state
+  const [isAdmin, setIsAdmin] = useState(false);
+  
+  // Toggle loading state
+  const [togglingVehicleId, setTogglingVehicleId] = useState(null);
+
+  // Check if user is admin
+  useEffect(() => {
+    setIsAdmin(vehicleService.isAdmin());
+  }, []);
 
   // Fetch vehicles
   const fetchVehicles = useCallback(async (page = 1) => {
@@ -79,7 +91,6 @@ function Vehicles() {
         ordering: '-created_at'
       };
       
-      // Add filters
       if (filters.search) params.search = filters.search;
       if (filters.company) params.company = filters.company;
       if (filters.status !== 'all') {
@@ -136,7 +147,6 @@ function Vehicles() {
     const total = data.length;
     const active = data.filter(v => v.is_active === true).length;
     const inactive = data.filter(v => v.is_active === false).length;
-    // Under maintenance is a status from the data
     const maintenance = data.filter(v => v.status === 'Under Maintenance').length || 0;
     
     setStats({
@@ -235,6 +245,61 @@ function Vehicles() {
     }
   };
 
+  // Handle quick status toggle from card
+  const handleQuickStatusToggle = async (vehicle) => {
+    setTogglingVehicleId(vehicle.id);
+    try {
+      const formData = new FormData();
+      formData.append('is_active', !vehicle.is_active ? 'true' : 'false');
+      
+      const result = await vehicleService.updateVehicle(vehicle.id, formData);
+      if (result.success) {
+        // Update the vehicle in the list
+        setVehicles(prevVehicles => 
+          prevVehicles.map(v => 
+            v.id === vehicle.id 
+              ? { ...v, is_active: !v.is_active }
+              : v
+          )
+        );
+        // Update stats
+        updateStats(vehicles.map(v => 
+          v.id === vehicle.id 
+            ? { ...v, is_active: !v.is_active }
+            : v
+        ));
+        return { success: true };
+      } else {
+        return { success: false, message: result.message };
+      }
+    } catch (error) {
+      console.error('Error toggling status:', error);
+      return { success: false, message: 'Failed to update status' };
+    } finally {
+      setTogglingVehicleId(null);
+    }
+  };
+
+  // Handle status toggle from view modal
+  const handleStatusToggle = async (vehicleId, currentStatus) => {
+    try {
+      const formData = new FormData();
+      formData.append('is_active', !currentStatus ? 'true' : 'false');
+      
+      const result = await vehicleService.updateVehicle(vehicleId, formData);
+      if (result.success) {
+        // Refresh the vehicles list
+        await fetchVehicles(pagination.currentPage);
+        return { success: true };
+      } else {
+        return { success: false, message: result.message };
+      }
+    } catch (error) {
+      console.error('Error toggling status:', error);
+      return { success: false, message: 'Failed to update status' };
+    }
+  };
+
   // Open edit modal
   const openEditModal = (vehicle) => {
     setSelectedVehicle(vehicle);
@@ -273,10 +338,23 @@ function Vehicles() {
     }
   };
 
-  // Get amenity names
-  const getAmenityNames = (amenities) => {
-    if (!amenities || amenities.length === 0) return 'None';
-    return amenities.map(a => a.amenity).join(', ');
+  // Generate stars based on rating
+  const renderStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating || 0);
+    const hasHalfStar = (rating || 0) % 1 >= 0.5;
+    
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(<FaStar key={`star-${i}`} className="star-filled" />);
+    }
+    if (hasHalfStar) {
+      stars.push(<FaStar key="half-star" className="star-half" />);
+    }
+    const emptyStars = 5 - stars.length;
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(<FaStar key={`empty-${i}`} className="star-empty" />);
+    }
+    return stars;
   };
 
   // Render loading state
@@ -305,6 +383,17 @@ function Vehicles() {
 
   return (
     <div className="vehicles-page">
+      {/* Page Header */}
+      <div className="page-header">
+        <div className="header-left">
+          <h1>Vehicles</h1>
+          <p className="header-subtitle">Manage your fleet, availability and pricing across all categories.</p>
+        </div>
+        <button className="add-btn-primary" onClick={() => setShowAddModal(true)}>
+          <FaPlus /> Add Vehicle
+        </button>
+      </div>
+
       {/* Stats Cards */}
       <div className="stats-grid">
         <div className="stat-card card1">
@@ -340,24 +429,30 @@ function Vehicles() {
         </div>
       </div>
 
-      {/* Table Section */}
-      <div className="table-card1">
-        <div className="table-top1">
-          <h2>All Vehicles</h2>
+      {/* Search and Filters */}
+      <div className="search-filter-section">
+        <div className="search-box">
+          <FaSearch className="search-icon" />
+          <input
+            type="text"
+            placeholder="Search vehicles..."
+            value={filters.search}
+            onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+          />
+        </div>
+        <button 
+          className="filter-toggle-btn"
+          onClick={() => setShowFilters(!showFilters)}
+        >
+          <FaFilter /> Filters
+        </button>
+      </div>
 
-          <div className="filters1">
-
-              
-            <div className="search-box">
-              <FaSearch className="search-icon" />
-              <input
-                type="text"
-                placeholder="Search by name, number, company..."
-                value={filters.search}
-                onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-              />
-            </div>
-
+      {/* Filter Panel */}
+      {showFilters && (
+        <div className="filter-panel">
+          <div className="filter-group">
+            <label>Status</label>
             <select
               value={filters.status}
               onChange={(e) => handleFilterChange('status', e.target.value)}
@@ -366,169 +461,196 @@ function Vehicles() {
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select>
-
-            <button className="add-btn" onClick={() => setShowAddModal(true)}>
-              <FaPlus /> Add Vehicle
-            </button>
+          </div>
+          <div className="filter-group">
+            <label>Min Price (₹)</label>
+            <input
+              type="number"
+              placeholder="Min"
+              value={filters.minPrice}
+              onChange={(e) => handleFilterChange('minPrice', e.target.value)}
+            />
+          </div>
+          <div className="filter-group">
+            <label>Max Price (₹)</label>
+            <input
+              type="number"
+              placeholder="Max"
+              value={filters.maxPrice}
+              onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
+            />
+          </div>
+          <div className="filter-group">
+            <label>Min Seats</label>
+            <input
+              type="number"
+              placeholder="Min"
+              value={filters.minSeat}
+              onChange={(e) => handleFilterChange('minSeat', e.target.value)}
+            />
+          </div>
+          <div className="filter-group">
+            <label>Max Seats</label>
+            <input
+              type="number"
+              placeholder="Max"
+              value={filters.maxSeat}
+              onChange={(e) => handleFilterChange('maxSeat', e.target.value)}
+            />
           </div>
         </div>
+      )}
 
-        <div className="table-wrapper1">
-          <table>
-            <thead>
-              <tr>
-                <th>Vehicle</th>
-                <th>Company</th>
-                <th>Plate Number</th>
-                <th>Price/Km</th>
-                <th>Seats</th>
-                <th>Status</th>
-                <th>Amenities</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {vehicles.length === 0 ? (
-                <tr>
-                  <td colSpan="8" className="no-data">
-                    <p>No vehicles found</p>
-                  </td>
-                </tr>
-              ) : (
-                vehicles.map((vehicle, index) => (
-                  <tr key={vehicle.id || index}>
-                    <td>
-                      <div className="vehicle-info">
-                        <img
-                          src={
-                            vehicle.images && vehicle.images.length > 0
-                              ? vehicle.images[0].image
-                              : `https://ui-avatars.com/api/?name=${encodeURIComponent(vehicle.veichle_name)}&size=50&background=667eea&color=fff`
-                          }
-                          alt={vehicle.veichle_name}
-                          className="vehicle-img"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(vehicle.veichle_name)}&size=50&background=667eea&color=fff`;
-                          }}
-                        />
-                        <div>
-                          <h4>{vehicle.veichle_name}</h4>
-                          <span className="vehicle-desc">
-                            {vehicle.veichle_description || `${vehicle.total_number_of_sheat} Seater`}
-                          </span>
-                          
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="company-info">
-                        <FaBuilding className="company-icon" />
-                        <span>{vehicle.compeny_name || 'N/A'}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="plate-number">
-                        {/* {vehicle.veichle_number || 'N/A'} */}
-                        N/A
+      {/* Vehicle Cards Grid */}
+      <div className="vehicles-grid">
+        {vehicles.length === 0 ? (
+          <div className="no-vehicles">
+            <p>No vehicles found</p>
+          </div>
+        ) : (
+          vehicles.map((vehicle) => {
+            // Get the image URL for the card background
+            const imageUrl = vehicle.images && vehicle.images.length > 0
+              ? vehicle.images[0].image
+              : `https://ui-avatars.com/api/?name=${encodeURIComponent(vehicle.veichle_name)}&size=400&background=0ea5a4&color=fff&bold=true`;
+            
+            const isToggling = togglingVehicleId === vehicle.id;
+            
+            return (
+              <div 
+                key={vehicle.id} 
+                className="vehicle-card"
+                style={{
+                  '--bg-image': `url(${imageUrl})`
+                }}
+              >
+                {/* Background image using inline style */}
+                <style>{`
+                  .vehicle-card[style*="--bg-image"]::before {
+                    background-image: var(--bg-image);
+                  }
+                `}</style>
+                
+                {/* Action Buttons */}
+                <div className="vehicle-card-header">
+                  <button 
+                    className="action-btn view-btn"
+                    onClick={() => openViewModal(vehicle)}
+                    title="View Details"
+                  >
+                    <FaEye />
+                  </button>
+                  <button 
+                    className="action-btn edit-btn"
+                    onClick={() => openEditModal(vehicle)}
+                    title="Edit Vehicle"
+                  >
+                    <FaEdit />
+                  </button>
+                  <button 
+                    className="action-btn delete-btn"
+                    onClick={() => openDeleteModal(vehicle)}
+                    title="Delete Vehicle"
+                  >
+                    <FaTrash />
+                  </button>
+                </div>
+
+                {/* Card Content */}
+                <div className="vehicle-card-content">
+                  <h3 className="vehicle-name">{vehicle.veichle_name}</h3>
+                  
+                  <div className="vehicle-meta">
+                    <span className="meta-item">
+                      <FaUserFriends className="meta-icon" />
+                      {vehicle.total_number_of_sheat || 0} seats
+                    </span>
+                    <span className="meta-item rating">
+                      {renderStars(vehicle.rating || 4.5)}
+                      <span className="rating-value">{vehicle.rating || 4.5}</span>
+                    </span>
+                  </div>
+
+                  <div className="vehicle-price">
+                    <span className="price-amount">₹{vehicle.price_per_km || 0}</span>
+                    <span className="price-unit"> /per km</span>
+                  </div>
+
+                  <div className="vehicle-card-footer">
+                    <div className="vehicle-status-wrapper">
+                      {/* Status Dot and Text */}
+                      <div className="vehicle-status">
+                        <span className={`status-dot ${getStatusBadge(vehicle.is_active)}`}></span>
+                        <span className="status-text">
+                          {vehicle.is_active ? 'Active' : 'Inactive'}
                         </span>
-                    </td>
-                    <td>
-                      <div className="price-info">
-                        <FaTag className="price-icon" />
-                        <span>₹{vehicle.price_per_km || 0}/km</span>
                       </div>
-                    </td>
-                    <td>
-                      <div className="seat-info">
-                        <FaUserFriends className="seat-icon" />
-                        <span>{vehicle.total_number_of_sheat || 0}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <span className={`status ${getStatusBadge(vehicle.is_active)}`}>
-                        {vehicle.is_active ? 'Active' : 'Inactive'}
-                      </span>
-                      <span className="status-date">
-                        <FaCalendarAlt className="date-icon" />
-                        {formatDate(vehicle.updated_at)}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="amenities-list">
-                        {vehicle.amenities && vehicle.amenities.length > 0 ? (
+                      
+                      {/* Toggle Switch - Always visible */}
+                      <button
+                        className={`toggle-switch ${vehicle.is_active ? 'active' : 'inactive'}`}
+                        onClick={() => handleQuickStatusToggle(vehicle)}
+                        disabled={isToggling}
+                        title={vehicle.is_active ? 'Click to deactivate' : 'Click to activate'}
+                      >
+                        {isToggling ? (
+                          <FaSpinner className="spinner-small" />
+                        ) : vehicle.is_active ? (
                           <>
-                            {vehicle.amenities.slice(0, 2).map((amenity, idx) => (
-                              <span key={idx} className="amenity-tag">
-                                {amenity.amenity}
-                              </span>
-                            ))}
-                            {vehicle.amenities.length > 2 && (
-                              <span className="amenity-count">
-                                +{vehicle.amenities.length - 2}
-                              </span>
-                            )}
+                            <FaToggleOn className="toggle-icon" />
+                            <span className="toggle-label">Active</span>
                           </>
                         ) : (
-                          <span className="no-amenities">None</span>
+                          <>
+                            <FaToggleOff className="toggle-icon" />
+                            <span className="toggle-label">Inactive</span>
+                          </>
                         )}
-                      </div>
-                    </td>
-                    <td>
-                      <div className="actions1">
-                        <FaEye 
-                          className="action-icon view" 
-                          onClick={() => openViewModal(vehicle)}
-                          title="View Details"
-                        />
-                        <FaEdit 
-                          className="action-icon edit" 
-                          onClick={() => openEditModal(vehicle)}
-                          title="Edit Vehicle"
-                        />
-                        <FaTrash 
-                          className="action-icon delete" 
-                          onClick={() => openDeleteModal(vehicle)}
-                          title="Delete Vehicle"
-                        />
-                        <FaEllipsisV className="action-icon more" title="More" />
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        {pagination.totalPages > 1 && (
-          <div className="pagination">
-            <button
-              onClick={() => handlePageChange(pagination.currentPage - 1)}
-              disabled={!pagination.hasPrevious}
-              className="page-btn"
-            >
-              Previous
-            </button>
-            <span className="page-info">
-              Page {pagination.currentPage} of {pagination.totalPages}
-              <span className="total-records">
-                ({pagination.totalRecords} vehicles)
-              </span>
-            </span>
-            <button
-              onClick={() => handlePageChange(pagination.currentPage + 1)}
-              disabled={!pagination.hasNext}
-              className="page-btn"
-            >
-              Next
-            </button>
-          </div>
+                      </button>
+                    </div>
+                    
+                    <button 
+                      className="view-details-btn"
+                      onClick={() => openViewModal(vehicle)}
+                    >
+                      View
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })
         )}
       </div>
 
+      {/* Pagination */}
+      {pagination.totalPages > 1 && (
+        <div className="pagination">
+          <button
+            onClick={() => handlePageChange(pagination.currentPage - 1)}
+            disabled={!pagination.hasPrevious}
+            className="page-btn"
+          >
+            Previous
+          </button>
+          <span className="page-info">
+            Page {pagination.currentPage} of {pagination.totalPages}
+            <span className="total-records">
+              ({pagination.totalRecords} vehicles)
+            </span>
+          </span>
+          <button
+            onClick={() => handlePageChange(pagination.currentPage + 1)}
+            disabled={!pagination.hasNext}
+            className="page-btn"
+          >
+            Next
+          </button>
+        </div>
+      )}
+
       {/* Modals */}
+      {/* Add Vehicle Modal */}
       <VehicleModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
@@ -537,8 +659,11 @@ function Vehicles() {
         amenities={amenities}
         title="Add New Vehicle"
         submitText="Create Vehicle"
+        isViewMode={false}
+        isAdmin={isAdmin}
       />
 
+      {/* Edit Vehicle Modal */}
       <VehicleModal
         isOpen={showEditModal}
         onClose={() => {
@@ -551,8 +676,11 @@ function Vehicles() {
         vehicle={selectedVehicle}
         title="Edit Vehicle"
         submitText="Update Vehicle"
+        isViewMode={false}
+        isAdmin={isAdmin}
       />
 
+      {/* Delete Confirmation Modal */}
       <DeleteConfirmModal
         isOpen={showDeleteModal}
         onClose={() => {
@@ -565,99 +693,36 @@ function Vehicles() {
       />
 
       {/* View Vehicle Modal */}
-{/* View Vehicle Modal */}
-{showViewModal && selectedVehicle && (
-  <div className="modal-overlay" onClick={() => setShowViewModal(false)}>
-    <div className="modal-content view-modal" onClick={(e) => e.stopPropagation()}>
-      {/* Sticky Header - Always visible */}
-      <div className="modal-sticky-header">
-        <div className="modal-header-top">
-          <h2>Vehicle Details</h2>
-          <button className="modal-close" onClick={() => setShowViewModal(false)}>×</button>
-        </div>
-        
-        {/* Vehicle Main Info - Stays on top */}
-        <div className="vehicle-main-info">
-          <div className="vehicle-avatar">
-            <img
-              src={
-                selectedVehicle.images && selectedVehicle.images.length > 0
-                  ? selectedVehicle.images[0].image
-                  : `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedVehicle.veichle_name)}&size=80&background=0ea5a4&color=fff&bold=true`
-              }
-              alt={selectedVehicle.veichle_name}
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedVehicle.veichle_name)}&size=80&background=0ea5a4&color=fff&bold=true`;
-              }}
-            />
-            <div className="vehicle-name-info">
-              <h3>{selectedVehicle.veichle_name}</h3>
-              <p className="vehicle-company">{selectedVehicle.compeny_name}</p>
-              <p className="vehicle-plate">{selectedVehicle.veichle_number}</p>
-            </div>
-          </div>
-          <div className="vehicle-status-badge">
-            <span className={`status-badge ${selectedVehicle.is_active ? 'active' : 'inactive'}`}>
-              <span className="dot"></span>
-              {selectedVehicle.is_active ? 'Active' : 'Inactive'}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Scrollable Body - Only this part scrolls */}
-      <div className="modal-scrollable-body">
-        <div className="view-vehicle-details">
-          {/* Details Grid */}
-          <div className="details-grid">
-            <div className="detail-item">
-              <span className="detail-label">Price per KM</span>
-              <span className="detail-value">₹{selectedVehicle.price_per_km || 0}</span>
-            </div>
-            <div className="detail-item">
-              <span className="detail-label">Seats</span>
-              <span className="detail-value">{selectedVehicle.total_number_of_sheat || 0}</span>
-            </div>
-            <div className="detail-item full-width">
-              <span className="detail-label">Description</span>
-              <span className="detail-value">{selectedVehicle.veichle_description || 'No description'}</span>
-            </div>
-            <div className="detail-item full-width">
-              <span className="detail-label">Amenities</span>
-              <div className="detail-amenities">
-                {selectedVehicle.amenities && selectedVehicle.amenities.length > 0 ? (
-                  selectedVehicle.amenities.map((amenity, idx) => (
-                    <span key={idx} className="amenity-tag">{amenity.amenity}</span>
-                  ))
-                ) : (
-                  <span className="no-amenities">No amenities</span>
-                )}
-              </div>
-            </div>
-            <div className="detail-item">
-              <span className="detail-label">Added By</span>
-              <span className="detail-value">{selectedVehicle.added_by || 'N/A'}</span>
-            </div>
-            <div className="detail-item">
-              <span className="detail-label">Created At</span>
-              <span className="detail-value">{formatDate(selectedVehicle.created_at)}</span>
-            </div>
-          </div>
-
-          
-        </div>
-      </div>
-
-      {/* Footer - Always visible */}
-      <div className="modal-footer">
-        <button className="btn-close" onClick={() => setShowViewModal(false)}>
-          Close
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+      <VehicleModal
+        isOpen={showViewModal}
+        onClose={() => {
+          setShowViewModal(false);
+          setSelectedVehicle(null);
+        }}
+        onSubmit={async (data) => {
+          // Handle status toggle from view mode
+          if (selectedVehicle) {
+            const result = await handleStatusToggle(selectedVehicle.id, selectedVehicle.is_active);
+            if (result.success) {
+              // Update the selected vehicle's status locally
+              setSelectedVehicle(prev => ({
+                ...prev,
+                is_active: !prev.is_active
+              }));
+              return result;
+            }
+            return result;
+          }
+          return { success: false };
+        }}
+        loading={modalLoading}
+        amenities={amenities}
+        vehicle={selectedVehicle}
+        title="Vehicle Details"
+        submitText=""
+        isViewMode={true}
+        isAdmin={isAdmin}
+      />
     </div>
   );
 }

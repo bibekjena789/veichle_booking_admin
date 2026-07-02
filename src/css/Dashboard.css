@@ -1,299 +1,660 @@
+/* Dashboard.css - PixiYatra Admin Dashboard Styles */
+
+/* ===== GLOBAL RESET & BASE ===== */
 .pixiyatra-dashboard-main-container {
-  padding: 12px;
-  background: #f7f8fc;
-  min-height: calc(100vh - 90px);
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f3f6fc;
+  min-height: 100vh;
 }
 
-/* HERO */
-
+/* ===== HERO BANNER ===== */
 .pixiyatra-dashboard-hero-banner-section {
-  height: 210px;
-  border-radius: 20px;
-  overflow: hidden;
+  background: linear-gradient(135deg, #0b2b5c 0%, #1a4a7a 100%);
+  border-radius: 32px;
+  padding: 40px 40px 50px;
+  margin-bottom: 40px;
   position: relative;
-  background: url("src/assets/images/dashboard_image/hero_Image.jpg")
-    center/cover no-repeat;
+  overflow: hidden;
+  box-shadow: 0 20px 40px -10px rgba(11, 43, 92, 0.25);
 }
 
 .pixiyatra-dashboard-hero-banner-overlay {
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(2px);
-  padding: 20px 30px;
+  position: relative;
+  z-index: 2;
 }
 
 .pixiyatra-dashboard-hero-banner-overlay h1 {
-  font-size: 28px;
+  font-size: 2.4rem;
   font-weight: 600;
-  color: #222;
-  line-height: 1;
-  text-align: left;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  margin-bottom: 28px;
 }
 
-.pixiyatra-dashboard-hero-banner-overlay span {
-  color: #7c4dff;
+.pixiyatra-dashboard-hero-banner-overlay h1 span {
+  color: #f7d44a;
+  font-weight: 700;
 }
 
-/* SEARCH */
-
+/* ===== SEARCH BAR ===== */
 .pixiyatra-dashboard-flight-search-container {
-  position: absolute;
-  left: 20px;
-  right: 20px;
-  bottom: 12px;
-  background: #fff;
-  border-radius: 18px;
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  padding: 12px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 80px;
+  padding: 8px 12px 8px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s;
 }
 
 .pixiyatra-dashboard-flight-search-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  padding: 10px 18px 10px 12px;
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  flex: 1 0 auto;
+  min-width: 140px;
 }
 
-.pixiyatra-dashboard-flight-search-item label {
-  font-size: 11px;
-  color: #888;
+.pixiyatra-dashboard-flight-search-item:last-of-type {
+  border-right: none;
 }
 
-.pixiyatra-dashboard-flight-search-item p {
-  font-size: 12px;
+.pixiyatra-dashboard-flight-search-item svg {
+  color: #f7d44a;
+  font-size: 1.1rem;
+  min-width: 20px;
+}
+
+.pixiyatra-dashboard-flight-search-item div label {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.6);
   font-weight: 500;
 }
 
-.pixiyatra-dashboard-flight-search-button {
-  width: 45px;
-  height: 45px;
-  border: none;
-  border-radius: 12px;
-  background: #7c4dff;
-  color: #fff;
-  cursor: pointer;
+.pixiyatra-dashboard-flight-search-item div p {
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 0.95rem;
+  margin-top: 2px;
 }
 
-/* STATS */
+.pixiyatra-dashboard-flight-search-button {
+  background: #f7d44a;
+  border: none;
+  border-radius: 60px;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0b2b5c;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: 0.2s;
+  margin-left: 6px;
+  box-shadow: 0 6px 14px rgba(247, 212, 74, 0.3);
+  flex-shrink: 0;
+}
 
+.pixiyatra-dashboard-flight-search-button:hover {
+  background: #ffe066;
+  transform: scale(1.02);
+}
+
+/* ===== STATISTICS GRID ===== */
 .pixiyatra-dashboard-statistics-grid-container {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-top: 15px;
+  gap: 24px;
+  margin-bottom: 40px;
 }
 
 .pixiyatra-dashboard-single-statistics-card {
-  background: #fff;
-  border-radius: 16px;
-  padding: 14px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, .05);
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 22px 24px;
+  box-shadow: 0 6px 18px rgba(0, 20, 50, 0.04);
+  transition: 0.2s;
+  border: 1px solid rgba(0, 0, 0, 0.02);
+}
+
+.pixiyatra-dashboard-single-statistics-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 20, 50, 0.08);
+  transform: translateY(-2px);
 }
 
 .pixiyatra-dashboard-single-statistics-card h5 {
-  font-size: 12px;
-  color: #777;
+  color: #5b6f87;
+  font-weight: 500;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  margin-bottom: 8px;
 }
 
 .pixiyatra-dashboard-single-statistics-card h2 {
-  font-size: 22px;
-  margin: 5px 0;
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: #0b2b5c;
+  margin-bottom: 6px;
 }
 
 .pixiyatra-dashboard-single-statistics-card span {
-  font-size: 12px;
-  color: #6c63ff;
+  color: #2b7b6e;
+  font-weight: 500;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-/* MAIN GRID */
+.pixiyatra-dashboard-single-statistics-card .trend-up {
+  color: #2b7b6e;
+  font-size: 0.75rem;
+}
 
+.pixiyatra-dashboard-single-statistics-card .trend-down {
+  color: #b34a4a;
+  font-size: 0.75rem;
+}
+
+.pixiyatra-dashboard-single-statistics-card span .trend-down {
+  color: #b34a4a;
+}
+
+/* ===== MAIN CONTENT GRID ===== */
 .pixiyatra-dashboard-content-main-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 15px;
-  margin-top: 15px;
-  align-items: start;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 30px;
 }
 
-/* COMMON CARD */
-
+/* ===== COMMON SECTION CARD ===== */
 .pixiyatra-dashboard-common-section-card {
-  background: #fff;
-  border-radius: 18px;
-  padding: 12px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, .05);
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 24px 24px 28px;
+  box-shadow: 0 8px 24px rgba(0, 20, 50, 0.04);
+  border: 1px solid #f0f4fe;
+  margin-bottom: 28px;
+}
+
+.pixiyatra-dashboard-common-section-card:last-child {
+  margin-bottom: 0;
 }
 
 .pixiyatra-dashboard-common-section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 22px;
 }
 
 .pixiyatra-dashboard-common-section-header h3 {
-  font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #0b2b5c;
+  margin: 0;
 }
 
 .pixiyatra-dashboard-common-section-header a {
+  color: #2b7b6e;
+  font-weight: 500;
+  font-size: 0.9rem;
   text-decoration: none;
-  color: #6c63ff;
-  font-size: 12px;
+  border-bottom: 1px dashed #b8d0d0;
+  transition: 0.2s;
 }
 
-/* LEFT */
-
-.pixiyatra-dashboard-left-content-panel {
-  width: 100%;
+.pixiyatra-dashboard-common-section-header a:hover {
+  color: #1a5c4f;
+  border-bottom-color: #1a5c4f;
 }
 
-.pixiyatra-dashboard-left-content-panel
-  .pixiyatra-dashboard-common-section-card {
-  min-height: 260px;
+.pixiyatra-dashboard-legend-text {
+  color: #5b6f87;
+  font-size: 0.8rem;
+  font-weight: 400;
 }
 
-/* TRIP CARD */
-
+/* ===== UPCOMING TRIPS ===== */
 .pixiyatra-dashboard-upcoming-trip-card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 0;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #edf2f9;
+}
+
+.pixiyatra-dashboard-upcoming-trip-card:last-child {
+  border-bottom: none;
 }
 
 .pixiyatra-dashboard-upcoming-trip-card img {
-  width: 90px;
-  height: 60px;
-  border-radius: 10px;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
   object-fit: cover;
+  background: #d9e2ef;
+  flex-shrink: 0;
 }
 
-.pixiyatra-dashboard-upcoming-trip-card h4 {
-  font-size: 14px;
-  margin-bottom: 4px;
+.pixiyatra-dashboard-upcoming-trip-card div {
+  flex: 1;
 }
 
-.pixiyatra-dashboard-upcoming-trip-card p {
-  font-size: 12px;
-  color: #666;
+.pixiyatra-dashboard-upcoming-trip-card div h4 {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #0b2b5c;
+  margin: 0 0 2px 0;
+}
+
+.pixiyatra-dashboard-upcoming-trip-card div p {
+  color: #5b6f87;
+  font-size: 0.8rem;
+  margin: 0;
 }
 
 .pixiyatra-dashboard-trip-status-badge {
-  margin-left: auto;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 11px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 30px;
+  background: #e8f0fe;
+  color: #1f4a7a;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .pixiyatra-dashboard-trip-status-confirmed {
-  background: #dff6e5;
-  color: #14a44d;
+  background: #e1f5ec;
+  color: #1b6b58;
 }
 
 .pixiyatra-dashboard-trip-status-pending {
-  background: #fff2d8;
-  color: #ff9800;
+  background: #fff3d6;
+  color: #a7691a;
 }
 
-/* RIGHT */
-
-.pixiyatra-dashboard-right-content-panel {
+/* ===== VEHICLE CATEGORIES ===== */
+.pixiyatra-dashboard-vehicle-categories {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
-/* DESTINATIONS */
+.pixiyatra-dashboard-category-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95rem;
+  color: #0b2b5c;
+  font-weight: 500;
+  padding: 4px 0;
+}
 
+.category-dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.category-dot.sedan {
+  background: #2b7b6e;
+}
+
+.category-dot.suv {
+  background: #f7d44a;
+}
+
+.category-dot.tempo {
+  background: #1f4a7a;
+}
+
+.category-percent {
+  margin-left: auto;
+  font-weight: 600;
+  color: #0b2b5c;
+}
+
+.pixiyatra-dashboard-chart-legend {
+  display: flex;
+  gap: 24px;
+  padding-top: 14px;
+  border-top: 1px solid #edf2f9;
+  font-size: 0.8rem;
+  color: #5b6f87;
+}
+
+.pixiyatra-dashboard-chart-legend span:first-child {
+  color: #2b7b6e;
+}
+
+.pixiyatra-dashboard-chart-legend span:last-child {
+  color: #f7d44a;
+}
+
+/* ===== POPULAR DESTINATIONS ===== */
 .pixiyatra-dashboard-popular-destination-wrapper {
   display: flex;
-  justify-content: space-between;
-  gap: 8px;
+  gap: 14px;
+  flex-wrap: wrap;
 }
 
 .pixiyatra-dashboard-single-destination-card {
+  flex: 1 0 calc(33.33% - 10px);
+  min-width: 80px;
+  border-radius: 20px;
+  overflow: hidden;
   position: relative;
+  background: #eef3fc;
+  aspect-ratio: 1/1;
+  display: flex;
+  align-items: flex-end;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  transition: 0.2s;
+}
+
+.pixiyatra-dashboard-single-destination-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
 }
 
 .pixiyatra-dashboard-single-destination-card img {
-  width: 90px;
-  height: 75px;
-  border-radius: 12px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .pixiyatra-dashboard-single-destination-card span {
-  position: absolute;
-  bottom: 6px;
-  left: 6px;
-  color: #fff;
-  font-size: 11px;
+  position: relative;
+  z-index: 2;
+  background: rgba(11, 43, 92, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  width: 100%;
+  padding: 10px 6px 8px;
+  text-align: center;
+  color: #ffffff;
   font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.01em;
 }
 
-/* OFFER */
-
+/* ===== SPECIAL OFFER CARD ===== */
 .pixiyatra-dashboard-special-offer-card {
-  padding: 12px;
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.pixiyatra-dashboard-special-offer-card h3 {
+  padding: 24px 24px 0 24px;
+  font-weight: 700;
+  color: #0b2b5c;
+  font-size: 1.25rem;
+  margin: 0;
 }
 
 .pixiyatra-dashboard-special-offer-card img {
   width: 100%;
-  height: 70px;
+  height: 150px;
   object-fit: cover;
-  border-radius: 12px;
-  margin-top: 8px;
+  margin-top: 12px;
+  background: #8aaac9;
+}
+
+.pixiyatra-dashboard-special-offer-details {
+  padding: 20px 24px 28px;
 }
 
 .pixiyatra-dashboard-offer-discount-badge {
+  background: #f7d44a;
+  color: #0b2b5c;
+  font-weight: 700;
+  font-size: 0.7rem;
+  padding: 4px 14px;
+  border-radius: 40px;
   display: inline-block;
-  margin-top: 8px;
-  padding: 3px 8px;
-  border-radius: 6px;
-  background: #6c63ff;
-  color: #fff;
-  font-size: 10px;
+  margin-bottom: 8px;
 }
 
 .pixiyatra-dashboard-special-offer-details h4 {
-  font-size: 13px;
-  margin-top: 6px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0b2b5c;
+  margin: 4px 0 0 0;
 }
 
 .pixiyatra-dashboard-special-offer-details h2 {
-  font-size: 18px;
-  color: #6c63ff;
-  margin-top: 3px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #0b2b5c;
+  margin-top: 6px;
 }
 
-/* MOBILE */
+/* ===== IMAGE FALLBACKS ===== */
+.pixiyatra-dashboard-upcoming-trip-card img[src*="destination1"],
+.pixiyatra-dashboard-single-destination-card img[src*="destination1"] {
+  background: linear-gradient(135deg, #819ab3, #a0b8cf);
+}
 
-@media (max-width: 992px) {
-  .pixiyatra-dashboard-flight-search-container {
-    position: static;
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-top: 15px;
-  }
+.pixiyatra-dashboard-upcoming-trip-card img[src*="destination2"],
+.pixiyatra-dashboard-single-destination-card img[src*="destination2"] {
+  background: linear-gradient(135deg, #a0b8cf, #b6cbe0);
+}
 
+.pixiyatra-dashboard-upcoming-trip-card img[src*="destination3"],
+.pixiyatra-dashboard-single-destination-card img[src*="destination3"] {
+  background: linear-gradient(135deg, #6d8aa8, #819ab3);
+}
+
+.pixiyatra-dashboard-special-offer-card img {
+  background: linear-gradient(135deg, #8aaac9, #6d8aa8);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablets & small laptops */
+@media (max-width: 1024px) {
   .pixiyatra-dashboard-statistics-grid-container {
     grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
   }
 
   .pixiyatra-dashboard-content-main-grid {
     grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .pixiyatra-dashboard-single-destination-card {
+    flex: 1 0 calc(33.33% - 10px);
+  }
+}
+
+/* Mobile devices */
+@media (max-width: 768px) {
+  .pixiyatra-dashboard-main-container {
+    padding: 12px;
   }
 
   .pixiyatra-dashboard-hero-banner-section {
-    height: auto;
+    padding: 24px 20px 32px;
+    border-radius: 24px;
   }
 
-  .pixiyatra-dashboard-single-destination-card img {
+  .pixiyatra-dashboard-hero-banner-overlay h1 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+
+  .pixiyatra-dashboard-flight-search-container {
+    border-radius: 28px;
+    flex-direction: column;
+    align-items: stretch;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 16px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  .pixiyatra-dashboard-flight-search-item {
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 10px 0;
+    min-width: unset;
+  }
+
+  .pixiyatra-dashboard-flight-search-item:last-of-type {
+    border-bottom: none;
+  }
+
+  .pixiyatra-dashboard-flight-search-button {
     width: 100%;
-    height: 100px;
+    border-radius: 40px;
+    margin: 12px 0 0;
+    height: 48px;
+  }
+
+  .pixiyatra-dashboard-statistics-grid-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .pixiyatra-dashboard-single-statistics-card {
+    padding: 16px 18px;
+  }
+
+  .pixiyatra-dashboard-single-statistics-card h2 {
+    font-size: 1.6rem;
+  }
+
+  .pixiyatra-dashboard-content-main-grid {
+    gap: 16px;
+  }
+
+  .pixiyatra-dashboard-common-section-card {
+    padding: 18px 16px 22px;
+    border-radius: 20px;
+    margin-bottom: 18px;
+  }
+
+  .pixiyatra-dashboard-common-section-header {
+    margin-bottom: 16px;
+  }
+
+  .pixiyatra-dashboard-common-section-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .pixiyatra-dashboard-upcoming-trip-card {
+    padding: 10px 0;
+    gap: 12px;
+  }
+
+  .pixiyatra-dashboard-upcoming-trip-card img {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+  }
+
+  .pixiyatra-dashboard-popular-destination-wrapper {
+    gap: 10px;
+  }
+
+  .pixiyatra-dashboard-single-destination-card {
+    flex: 1 0 calc(50% - 5px);
+    min-width: 60px;
+  }
+
+  .pixiyatra-dashboard-single-destination-card span {
+    font-size: 0.75rem;
+    padding: 8px 4px 6px;
+  }
+
+  .pixiyatra-dashboard-special-offer-card h3 {
+    padding: 18px 18px 0 18px;
+    font-size: 1.1rem;
+  }
+
+  .pixiyatra-dashboard-special-offer-card img {
+    height: 120px;
+  }
+
+  .pixiyatra-dashboard-special-offer-details {
+    padding: 16px 18px 22px;
+  }
+
+  .pixiyatra-dashboard-special-offer-details h2 {
+    font-size: 1.5rem;
+  }
+
+  .pixiyatra-dashboard-vehicle-categories {
+    gap: 8px;
+  }
+
+  .pixiyatra-dashboard-category-item {
+    font-size: 0.85rem;
+  }
+
+  .pixiyatra-dashboard-chart-legend {
+    font-size: 0.7rem;
+    gap: 16px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .pixiyatra-dashboard-statistics-grid-container {
+    grid-template-columns: 1fr;
+  }
+
+  .pixiyatra-dashboard-single-statistics-card {
+    padding: 14px 16px;
+  }
+
+  .pixiyatra-dashboard-single-statistics-card h2 {
+    font-size: 1.4rem;
+  }
+
+  .pixiyatra-dashboard-hero-banner-overlay h1 {
+    font-size: 1.4rem;
+  }
+
+  .pixiyatra-dashboard-flight-search-item div p {
+    font-size: 0.85rem;
+  }
+
+  .pixiyatra-dashboard-single-destination-card {
+    flex: 1 0 calc(50% - 5px);
+  }
+
+  .pixiyatra-dashboard-upcoming-trip-card div h4 {
+    font-size: 0.9rem;
+  }
+
+  .pixiyatra-dashboard-trip-status-badge {
+    font-size: 0.6rem;
+    padding: 4px 10px;
   }
 }
